@@ -223,9 +223,8 @@ details.rv:not([open]) .rv-open::after{content:"해설"}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 <style>
-/* 파일로 직접 열 때를 위한 기본값 (아티팩트에서는 플랫폼이 넣어 주는 부분) */
-:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-body{margin:0;font:14px system-ui,-apple-system,sans-serif;background:#fafaf9}
+/* 파일로 직접 열 때를 위한 기본값 */
+body{margin:0}
 img{max-width:100%}
 [hidden]{display:none!important}
 </style>
