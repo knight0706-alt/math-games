@@ -3,14 +3,7 @@
   © 2026 슬픈달 (knight0706.tistory.com)
   무단 복제 및 재배포를 금합니다.
 -->
-<!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#EFEDF6">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>소수 보석 공방</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;700&display=swap">
 <style>
@@ -242,15 +235,7 @@ details.rv:not([open]) .rv-open::after{content:"해설"}
 .pop{animation:sparkle .45s}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
-<style>
-/* 파일로 직접 열 때를 위한 기본값 (아티팩트에서는 플랫폼이 넣어 주는 부분) */
-:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-body{margin:0;font:14px system-ui,-apple-system,sans-serif;background:#fafaf9}
-img{max-width:100%}
-[hidden]{display:none!important}
-</style>
-</head>
-<body>
+
 <div id="app">
   <section id="home" class="screen">
     <div class="head">
@@ -346,6 +331,27 @@ function str(o){
 }
 function milli(o){return o.v*POW[3-o.p]}
 function same(a,b){return milli(a)===milli(b)}
+var P10=[1,10,100,1000,10000,100000];
+/* 뒤에 붙은 0을 떼어 1.0 대신 1 로 보이게 */
+function norm(o){
+  var v=o.v,p=o.p;
+  while(p>0&&v%10===0){v=v/10;p--}
+  return dec(v,p);
+}
+function mul10(o){return norm(o.p>0?dec(o.v,o.p-1):dec(o.v*10,0))}
+function div10(o){return norm(dec(o.v,o.p+1))}
+/* 10^e 자리의 숫자. e=1 은 십의 자리, e=-2 는 소수 둘째 자리 */
+function digE(o,e){return Math.floor(milli(o)/P10[3+e])%10}
+/* 그 수가 실제로 쓰는 가장 높은 자리 */
+function hiOf(o){
+  for(var e=2;e>0;e--) if(digE(o,e)!==0) return e;
+  return 0;
+}
+/* 숫자 뒤 조사를 마지막 자리 숫자로 고른다 ("0.27이에요", "3.5예요") */
+function josaNum(s,w,o){
+  var last=s.charAt(s.length-1);
+  return jong(+last)?w:o;
+}
 /* k번째 자리 숫자. 0=일의 자리, 1=소수 첫째, 2=둘째, 3=셋째 */
 function digitAt(o,k){return Math.floor(o.v/POW[o.p-k])%10}
 var PLACE=['일의 자리','소수 첫째 자리','소수 둘째 자리','소수 셋째 자리'];
@@ -370,11 +376,12 @@ function readKo(o){
 }
 
 /* 오답 보기. 항상 need개를 채우고 끝난다. */
-function distract(ans,cands,need){
+function distract(ans,cands,need,bigOK){
   var out=[],seen=[milli(ans)],i,k,o;
   var ok=function(x){
     if(!x||x.v<0) return false;
-    if(x.p>0&&x.v>=POW[x.p]*10) return false;   /* 소수는 일의 자리를 한 자리로 */
+    /* bigOK 는 10배·100배를 다루는 문제용. 그 밖에는 일의 자리를 한 자리로 묶는다 */
+    if(x.p>0&&x.v>=POW[x.p]*(bigOK?1000:10)) return false;
     return seen.indexOf(milli(x))<0;
   };
   for(i=0;i<cands.length&&out.length<need;i++){
@@ -475,6 +482,32 @@ function cmpTable(list,names){
     h+='</tr>';
   }
   return h+'</tbody></table></div>'+(diff>=0?'<p style="margin-top:7px;font-size:15px;color:var(--muted)">'+PLACE[diff]+'에서 처음으로 숫자가 달라져요. 거기서 승부가 납니다.</p>':'');
+}
+/* 10배·1/10 을 할 때 숫자가 통째로 옆으로 옮겨 가는 모습을 보여 주는 표 */
+var ELAB={'2':'백의 자리','1':'십의 자리','0':'일의 자리','-1':'소수 첫째','-2':'소수 둘째','-3':'소수 셋째'};
+function relTable(before,after,up,steps){
+  var items=[before,after],hi=0,lo=0,i,e;
+  for(i=0;i<2;i++){
+    var ih=hiOf(items[i]);
+    if(ih>hi) hi=ih;
+    if(-items[i].p<lo) lo=-items[i].p;
+  }
+  if(hi>2) hi=2; if(lo<-3) lo=-3;
+  var h='<div class="tw"><table class="pv"><thead><tr><th></th>';
+  for(e=hi;e>=lo;e--) h+='<th>'+ELAB[''+e]+'</th>';
+  h+='</tr></thead><tbody>';
+  for(i=0;i<2;i++){
+    h+='<tr><td class="lab">'+str(items[i])+'</td>';
+    var top=hiOf(items[i]);
+    for(e=hi;e>=lo;e--){
+      var inside=(e<=top&&e>=-items[i].p);
+      h+='<td class="'+(inside?(i===1?'hi':''):'dim')+'">'+(inside?digE(items[i],e):'')+'</td>';
+    }
+    h+='</tr>';
+  }
+  return h+'</tbody></table></div>'
+    +'<p style="margin-top:7px;font-size:15px;color:var(--muted)">숫자가 <b style="color:var(--gemc)">'
+    +(up?'왼쪽':'오른쪽')+'으로 '+steps+'칸</b>씩 옮겨 갔어요. 숫자 자체는 그대로예요.</p>';
 }
 
 /* ---- 문제 만들기 ---- */
@@ -730,6 +763,88 @@ function genCompare(lv){
   }
   return q;
 }
+/* 5. 소수점 이사 — 10배와 1/10, 소수 사이의 관계 */
+function fromExp(e){return e>=0?dec(P10[e],0):dec(1,-e)}
+function genRelate(lv){
+  var src,res,steps,up,rev=false,i,q;
+  if(lv===1){
+    /* 0.001 · 0.01 · 0.1 · 1 · 10 사이를 한 칸씩 */
+    steps=1;
+    var e0=rnd(-3,1);
+    up=Math.random()<.5;
+    if(up&&e0>=1) up=false;
+    if(!up&&e0<=-3) up=true;
+    src=fromExp(e0);
+  }else if(lv===2){
+    steps=1;
+    up=Math.random()<.5;
+    var p2=pick([1,2]), v2=(p2===1)?rnd(1,99):rnd(1,999);
+    if(v2%10===0) v2+=rnd(1,9);
+    src=dec(v2,p2);
+  }else{
+    steps=pick([1,2,2]);
+    up=Math.random()<.5;
+    rev=Math.random()<.35;
+    /* 1/100 까지 내려가려면 소수 자리 여유가 있어야 한다 */
+    var p3=up?pick([1,2]):(steps===2?1:pick([1,2]));
+    var v3=(p3===1)?rnd(1,99):rnd(1,999);
+    if(v3%10===0) v3+=rnd(1,9);
+    src=dec(v3,p3);
+  }
+  src=norm(src);
+  res=src;
+  for(i=0;i<steps;i++) res=up?mul10(res):div10(res);
+
+  var times=(steps===2?'100':'10');
+  var opName=up?(times+'배'):('1/'+times);
+  var opJosa=up?'는':'은';
+  var opIga=up?'가':'이';   /* 10배가 / 1/10(십분의 일)이 */
+  var ansO=rev?src:res;
+  var shown=rev?res:src;
+  /* 'steps' 라는 이름은 아래 해설 배열이 쓰므로 자리 이동 칸 수는 shift 로 둔다 */
+  q={type:'relate',lv:lv,src:src,res:res,up:up,shift:steps,rev:rev,ans:ansO,
+     key:'r'+src.v+'p'+src.p+(up?'u':'d')+steps+(rev?'r':'f')};
+  if(rev){
+    q.question='어떤 수의 <b>'+opName+'</b>'+opIga+' <b class="num">'+str(res)+'</b>'+josaNum(str(res),'이에요','예요')+'. 어떤 수일까요?';
+    q.slipLabel='거꾸로 찾기';
+    q.slipHTML='<span class="order-v">?</span><span class="order-v" style="color:var(--muted)">×&nbsp;'+(up?times:('1/'+times))+'&nbsp;=</span><span class="order-v">'+str(res)+'</span>';
+    q.label='□의 '+opName+' = '+str(res);
+  }else{
+    q.question='<b class="num">'+str(src)+'</b>의 <b>'+opName+'</b>'+opJosa+' 얼마일까요?';
+    q.slipLabel=opName+' 하기';
+    q.slipHTML='<span class="order-v">'+str(src)+'</span><span class="order-v" style="color:var(--muted)">의 '+opName+opJosa+'?</span>';
+    q.label=str(src)+' 의 '+opName;
+  }
+  /* 오답은 '소수점을 잘못 옮긴' 모양으로 */
+  var cands=[mul10(ansO)];
+  if(ansO.p<3) cands.push(div10(ansO));
+  cands.push(mul10(mul10(ansO)));
+  if(ansO.p<2) cands.push(div10(div10(ansO)));
+  q.choices=shuffle([{o:ansO,correct:true}].concat(
+    distract(ansO,cands,2,true).map(function(x){return {o:x,correct:false}})));
+
+  var opEul=up?'를':'을';   /* 10배를 / 1/10(십분의 일)을 */
+  q.steps=[
+    {t:'한 번에 한 칸씩',b:'<p>'+(up
+        ? '<b>10배</b>를 하면 0.1이 1이 되고, 0.01이 0.1이 돼요. 자리가 하나씩 <b>커지는</b> 거예요.'
+        : '<b>1/10</b>을 하면 1이 0.1이 되고, 0.1이 0.01이 돼요. 자리가 하나씩 <b>작아지는</b> 거예요.')
+      +'</p>'+'<span class="eqn">'+(up?'0.01 → 0.1 → 1 → 10':'10 → 1 → 0.1 → 0.01')+'</span>'},
+    {t:'표에서 보면 이렇게 움직여요',b:'<p><b>'+str(src)+'</b>의 <b>'+opName+'</b>'+opEul
+      +' 구하면, 숫자들이 통째로 '+(up?'왼쪽':'오른쪽')+'으로 '+steps+'칸 옮겨 가요.</p>',
+     fig:relTable(src,res,up,steps),reveal:true},
+    {t:'소수점으로 외우면 빨라요',b:'<p>숫자가 '+(up?'왼쪽':'오른쪽')+'으로 가는 건, <b>소수점이 '+(up?'오른쪽':'왼쪽')
+      +'으로 '+steps+'칸</b> 가는 것과 똑같아 보여요. 그래서 '+opName+opJosa+' 소수점을 '+(up?'오른쪽':'왼쪽')+'으로 옮기면 돼요.</p>'
+      +'<span class="eqn">'+str(src)+'<span style="color:var(--muted)">&nbsp;—'+opName+'→&nbsp;</span>'+str(res)+'</span>',reveal:true}
+  ];
+  if(rev){
+    var back=up?('1/'+times):(times+'배');
+    var backEul=up?'을':'를';
+    q.steps.push({t:'거꾸로 가려면',b:'<p>'+opName+opEul+' 해서 '+str(res)+josaNum(str(res),'이','가')
+      +' 되었으니, 반대로 '+back+backEul+' 하면 처음 수를 찾을 수 있어요.</p>'
+      +'<span class="eqn">'+str(res)+'<span style="color:var(--muted)">&nbsp;—'+back+'→&nbsp;</span>'+str(src)+'</span>',reveal:true});
+  }
+  return q;
+}
 // ==LOGIC-END==
 
 /* ---- 저장 ---- */
@@ -821,11 +936,13 @@ var MODES={
     ico:'<svg viewBox="0 0 70 70" role="img" aria-label="모눈"><g stroke="var(--cell-line)" stroke-width="1">'
       +(function(){var s='',i,r,c;for(i=0;i<100;i++){r=Math.floor(i/10);c=i%10;s+='<rect x="'+(4+c*6.2)+'" y="'+(4+r*6.2)+'" width="6.2" height="6.2" fill="'+(i<34?'var(--cell-on)':'var(--cell)')+'"/>'}return s})()
       +'</g><rect x="4" y="4" width="62" height="62" fill="none" stroke="var(--ink)" stroke-width="2"/></svg>'},
+  relate:{name:'소수점 이사',desc:'10배 하면 소수점이 한 칸 옮겨 가요',lv:['0.1과 1 사이','10배와 1/10','100배까지, 거꾸로도'],
+    ico:'<svg viewBox="0 0 120 70" role="img" aria-label="소수점 이동"><text x="60" y="34" text-anchor="middle" style="font-family:var(--f-num);font-weight:700;font-size:24px;fill:var(--ink)">0.47</text><path d="M34 44 h44" stroke="var(--muted)" stroke-width="2.5"/><path d="M84 44 l-10 -5 v10 z" fill="var(--muted)"/><text x="56" y="66" text-anchor="middle" style="font-family:var(--f-num);font-weight:700;font-size:24px;fill:var(--gemc)">4.7</text></svg>'},
   compare:{name:'무게 겨루기',desc:'어느 쪽이 무거운지, 순서대로 줄 세워요',lv:['둘 중 큰 수','세 개 줄 세우기','세 자리까지 줄 세우기'],
     ico:'<svg viewBox="0 0 120 70" role="img" aria-label="비교"><text x="60" y="47" text-anchor="middle" style="font-family:var(--f-num);font-weight:700;font-size:34px;fill:var(--gemc)">&lt;</text><polygon points="22,20 34,32 22,44 10,32" fill="var(--sapphire)"/><polygon points="98,14 114,32 98,50 82,32" fill="var(--ruby)"/></svg>'}
 };
-var ORDER=['dial','place','grid','compare'];
-var GENS={dial:genDial,place:genPlace,grid:genGrid,compare:genCompare};
+var ORDER=['dial','place','grid','relate','compare'];
+var GENS={dial:genDial,place:genPlace,grid:genGrid,relate:genRelate,compare:genCompare};
 var GOOD=['정확해요!','눈금이 딱 맞았어요!','정답이에요!','우와, 보석 감정사네요!','한 자리도 안 틀렸어요!','공방장님 솜씨예요!'];
 var OOPS=['앗, 다시 볼까요?','조금만 더 생각해 봐요.','괜찮아요, 해설을 같이 봐요.','거의 다 왔어요!'];
 
@@ -924,6 +1041,9 @@ function renderQ(){
     say=q.question;
     h='<div class="order"><div class="order-l"><b>감정서</b>'+(q.sub==='digit'?PLACE[q.k]:(q.sub==='value'?'자리의 값':'0.01의 개수'))+'</div>'
       +q.promptHTML+'</div>'+choicesHTML(q);
+  }else if(q.type==='relate'){
+    say=q.question;
+    h='<div class="order"><div class="order-l"><b>이사 지시서</b>'+q.slipLabel+'</div>'+q.slipHTML+'</div>'+choicesHTML(q);
   }else if(q.type==='grid'){
     if(q.sub==='read'){
       say=q.question;
@@ -998,7 +1118,11 @@ function answer(ok,btn){
     fb(GOOD[rnd(0,GOOD.length-1)]+(gain?'  +'+gain+' 코인':''),'good');
     tone(SND.good);
     if(btn) btn.classList.add('yes');
-    $$('#bench .ch,#bench .sg').forEach(function(b){b.disabled=true});
+    /* 고르지 않은 보기도 흐리게 해서 무엇이 정답이었는지 한눈에 보이게 */
+    $$('#bench .ch,#bench .sg').forEach(function(b){
+      b.disabled=true;
+      if(btn&&b!==btn&&!b.classList.contains('yes')) b.classList.add('no');
+    });
     renderSol(true,true);
     $('#sol').classList.remove('pop');void $('#sol').offsetWidth;$('#sol').classList.add('pop');
     $('#check').hidden=true;$('#hintBtn').hidden=true;
@@ -1154,8 +1278,8 @@ $$('.snd').forEach(function(b){b.addEventListener('click',function(){save.sound=
 renderHome();show('home');
 })();
 </script>
-</body>
-</html>
+
+</body></html>
 <!--
   분수 주스 공장
   © 2026 슬픈달 (knight0706.tistory.com)
