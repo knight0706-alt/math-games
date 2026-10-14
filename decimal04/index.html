@@ -1,0 +1,1103 @@
+<!--
+  분수 주스 공장
+  © 2026 슬픈달 (knight0706.tistory.com)
+  무단 복제 및 재배포를 금합니다.
+-->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#EFEDE8">
+<title>소수 챔피언십</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gugi&family=Noto+Sans+KR:wght@400;700;900&family=Roboto+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: 대회 무대. 왼쪽에 트로피 진행자와 말풍선, 오른쪽에 문제판과 그 아래 해설. 끝나면 유형별 성적표. */
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#EFEDE8; --panel:#FFFFFF; --panel2:#F7F5F0; --ink:#1E1B2E; --muted:#5E5970; --line:#D3CEC4;
+  --gold:#BE8A15; --gold-deep:#8A6107; --gold-ink:#FFFBF0;
+  --crim:#BE2F45; --crim-deep:#8A1729; --crim-ink:#FFFFFF;
+  --board:#232841; --board-fg:#FFD36A; --board-dim:#4A5176;
+  --good:#0E7051; --bad:#B4362A; --star:#C8921A; --focus:#1550CE;
+  --t1:#2F6FB5; --t2:#8A4CB8; --t3:#1E8A5F; --t4:#C25A1E; --t5:#A3306B;
+  --f-display:'Gugi','Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  --f-body:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;
+  --f-num:'Roboto Mono','SFMono-Regular',Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15131F; --panel:#1F1C2E; --panel2:#282438; --ink:#EDEAF4; --muted:#A9A3BE; --line:#3A3550;
+    --gold:#E8B544; --gold-deep:#A87F18; --gold-ink:#2A1D03;
+    --crim:#FF6B7F; --crim-deep:#B33348; --crim-ink:#2A0710;
+    --board:#15192B; --board-fg:#FFD36A; --board-dim:#3A4166;
+    --good:#4FD2A2; --bad:#FF8A72; --star:#F0C14B; --focus:#8FB8FF;
+    --t1:#6FA8E0; --t2:#BD8BE6; --t3:#5FC79A; --t4:#F0935A; --t5:#E884B4;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15131F; --panel:#1F1C2E; --panel2:#282438; --ink:#EDEAF4; --muted:#A9A3BE; --line:#3A3550;
+  --gold:#E8B544; --gold-deep:#A87F18; --gold-ink:#2A1D03;
+  --crim:#FF6B7F; --crim-deep:#B33348; --crim-ink:#2A0710;
+  --board:#15192B; --board-fg:#FFD36A; --board-dim:#3A4166;
+  --good:#4FD2A2; --bad:#FF8A72; --star:#F0C14B; --focus:#8FB8FF;
+  --t1:#6FA8E0; --t2:#BD8BE6; --t3:#5FC79A; --t4:#F0935A; --t5:#E884B4;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
+  word-break:keep-all;overflow-wrap:break-word;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+h1,h2,h3,p,table{margin:0}
+#app{height:100%;max-width:1140px;margin:0 auto;padding-inline:16px;padding-block:12px;display:flex;flex-direction:column}
+.screen{flex:1;min-height:0;display:flex;flex-direction:column}
+
+.btn{min-height:56px;padding:0 22px;border-radius:11px;border:0;background:var(--gold);color:var(--gold-ink);font-weight:700;font-size:18px;box-shadow:0 4px 0 var(--gold-deep)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--gold-deep)}
+.btn.go{background:var(--crim);color:var(--crim-ink);box-shadow:0 4px 0 var(--crim-deep)}
+.btn.go:active{box-shadow:0 1px 0 var(--crim-deep)}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.btn.ghost:active{transform:translateY(2px)}
+.btn.small{min-height:48px;font-size:16px;padding:0 14px}
+.btn.wide{width:100%}
+.coins{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:5px 14px 5px 7px;font-family:var(--f-num);font-weight:700;font-size:19px}
+.coin{width:26px;height:26px;border-radius:50%;background:var(--star);border:4px solid var(--gold-deep);display:inline-block}
+.bump{animation:bump .4s}
+
+/* 홈 */
+#home{overflow-y:auto}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,5.4vw,46px);line-height:1.25;text-wrap:balance}
+.tag{display:inline-block;font-size:14px;font-weight:700;color:var(--crim);letter-spacing:.06em}
+.sub{color:var(--muted);margin-top:6px;max-width:38em;font-size:16px}
+.head-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+/* 전광판 */
+.board{margin-top:14px;background:var(--board);border-radius:14px;padding:13px 16px;display:flex;gap:14px 22px;flex-wrap:wrap;align-items:center}
+.board-t{font-family:var(--f-display);color:var(--board-fg);font-size:18px}
+.bstat{display:flex;flex-direction:column;gap:1px;min-width:72px}
+.bstat .k{font-size:12px;color:var(--board-dim);font-weight:700}
+.bstat .v{font-family:var(--f-num);font-weight:700;font-size:19px;color:#fff}
+.bstat .v.dim{color:var(--board-dim)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:14px;margin-top:16px}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:11px;min-width:0}
+.card.weak{border-color:var(--crim)}
+.ctop{display:flex;align-items:center;gap:10px}
+.cnum{flex:none;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-family:var(--f-display);font-size:19px;background:var(--panel2);border:2px solid var(--line)}
+.card.weak .cnum{background:var(--crim);color:var(--crim-ink);border-color:var(--crim)}
+.card h2{font-family:var(--f-display);font-weight:400;font-size:21px;line-height:1.25}
+.card p{color:var(--muted);font-size:14px;min-height:2.8em}
+.crow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stars{letter-spacing:2px;font-size:17px}
+.st{color:var(--line)}.st.on{color:var(--star)}
+.foot{color:var(--muted);font-size:14px;margin-block:18px 8px;max-width:52em}
+
+/* 플레이 */
+.bar{display:flex;align-items:center;gap:9px 12px;flex-wrap:wrap;padding-bottom:10px}
+.bar-t{flex:1;min-width:120px;font-family:var(--f-display);font-size:20px;line-height:1.25}
+.bar-t small{display:block;font-family:var(--f-body);font-size:13px;color:var(--muted)}
+.pips{display:flex;gap:6px}
+.pip{width:13px;height:13px;border-radius:50%;border:2px solid var(--line)}
+.pip.cur{border-color:var(--ink);transform:scale(1.25)}
+.pip.ok{background:var(--good);border-color:var(--good)}
+.pip.miss{background:var(--crim);border-color:var(--crim)}
+.qn{font-family:var(--f-num);color:var(--muted);font-size:14px}
+.work{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-content:start;padding-bottom:14px}
+@media (min-width:880px){.work{grid-template-columns:minmax(220px,27%) minmax(0,1fr)}}
+.left{display:flex;gap:12px;align-items:flex-start}
+@media (min-width:880px){.left{flex-direction:column}}
+#face{flex:none;width:76px}
+#face svg{display:block;width:100%;height:auto}
+@media (min-width:880px){#face{width:112px;align-self:center}}
+.bubble{position:relative;background:var(--panel);border:2px solid var(--line);border-radius:13px;padding:12px 14px;flex:1;min-width:0}
+.bubble::before{content:"";position:absolute;width:13px;height:13px;background:var(--panel);border-left:2px solid var(--line);border-bottom:2px solid var(--line);left:-8px;top:24px;transform:rotate(45deg)}
+@media (min-width:880px){.bubble{width:100%;flex:none}.bubble::before{left:50%;top:-8px;margin-left:-7px;transform:rotate(135deg)}}
+#say{font-weight:700;font-size:19px;line-height:1.45}
+#fb{margin-top:5px;min-height:1.5em;font-size:16px;font-weight:700}
+#fb.good{color:var(--good)}#fb.bad{color:var(--bad)}
+.right{display:flex;flex-direction:column;gap:12px;min-width:0}
+.stage{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:13px;min-width:0}
+.tchip{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;font-size:13px;font-weight:700;padding:4px 11px;border-radius:999px;color:#fff}
+.tchip.read{background:var(--t1)}.tchip.compare{background:var(--t2)}.tchip.add{background:var(--t3)}
+.tchip.sub{background:var(--t4)}.tchip.chain{background:var(--t5)}
+.qbox{background:var(--board);border-radius:11px;padding:14px 16px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 12px;
+  font-family:var(--f-num);font-weight:700;font-size:clamp(26px,6vmin,44px);line-height:1.15;color:var(--board-fg);text-align:center}
+.qbox .op{color:#fff;opacity:.7}
+.qbox .q{color:#fff}
+.qbox .word{font-family:var(--f-body);font-size:clamp(19px,4vmin,28px)}
+.qbox .u{font-size:.5em;color:var(--board-dim)}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.ch{min-height:90px;background:var(--panel2);border:3px solid var(--line);border-radius:12px;font-family:var(--f-num);font-weight:700;font-size:clamp(25px,5.2vmin,36px);display:flex;align-items:center;justify-content:center;padding:8px;line-height:1.1;text-align:center}
+.ch.word{font-family:var(--f-body);font-size:clamp(17px,3.4vmin,23px)}
+.ch:active{border-color:var(--crim);transform:translateY(2px)}
+.ch.no{opacity:.4;border-style:dashed;border-color:var(--bad)}
+.ch.yes{border-color:var(--good);box-shadow:0 0 0 3px var(--good)}
+.acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* 세로셈 */
+.vsum{--cw:clamp(22px,4.6vmin,31px);--dw:13px;--ow:20px;
+  display:inline-flex;flex-direction:column;gap:2px;font-family:var(--f-num);font-weight:700;
+  background:var(--panel2);border:2px solid var(--line);border-radius:9px;padding:12px 14px}
+.vrow{display:flex;align-items:flex-end;justify-content:flex-end}
+.vrow .op{width:var(--ow);text-align:center;color:var(--muted);font-size:clamp(23px,4.8vmin,32px);line-height:1.25}
+.vrow .cell{width:var(--cw);text-align:center;font-size:clamp(23px,4.8vmin,32px);line-height:1.25}
+.vrow .cell.dot{width:var(--dw);color:var(--crim)}
+.vrow .cell.pad{color:var(--muted);opacity:.6}
+.vrow .cell.blank{color:transparent}
+.vrow .cell.struck{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--crim);text-decoration-thickness:2px}
+.vrow.adj{height:19px}
+.vrow.adj .op,.vrow.adj .cell{font-size:13px;color:var(--crim);line-height:1}
+.vline{height:3px;background:var(--ink);margin:3px 0}
+
+/* 해설 */
+.sol{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.sol-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--f-display);font-size:19px}
+.sol-h .pill{font-family:var(--f-body);font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.steps{display:flex;flex-direction:column;gap:13px;counter-reset:s}
+.step{display:grid;grid-template-columns:32px minmax(0,1fr);gap:11px;align-items:start}
+.step::before{counter-increment:s;content:counter(s);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:var(--gold-ink);font-weight:700;font-size:17px}
+.step .sb{min-width:0}
+.step h3{font-weight:700;font-size:17px;margin-bottom:2px}
+.step p{font-size:16px;line-height:1.55}
+.step b{color:var(--crim)}
+.step .num{font-family:var(--f-num);font-weight:700}
+.eqn{display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px 8px;font-family:var(--f-num);font-weight:700;font-size:clamp(20px,4.2vmin,27px);line-height:1.2;margin-top:8px;padding:8px 12px;border-radius:8px;background:var(--panel2);border:1px solid var(--line)}
+.fig{margin-top:9px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.fig.col{flex-direction:column;align-items:flex-start}
+.tw{overflow-x:auto;margin-top:9px;border-radius:8px;border:1px solid var(--line)}
+table.pv{border-collapse:collapse;width:100%;min-width:280px;font-size:15px}
+table.pv th,table.pv td{border:1px solid var(--line);padding:7px 8px;text-align:center;white-space:nowrap}
+table.pv th{background:var(--panel2);font-size:13px;color:var(--muted);font-weight:700}
+table.pv td{font-family:var(--f-num);font-weight:700;font-size:19px}
+table.pv td.lab{font-family:var(--f-body);font-size:14px;font-weight:400;color:var(--muted);text-align:right}
+table.pv .hi{background:color-mix(in srgb,var(--crim) 14%,transparent);color:var(--crim)}
+table.pv .dim{color:var(--muted);opacity:.6}
+
+/* 결과 */
+#result{overflow-y:auto}
+.res{max-width:660px;display:flex;flex-direction:column;gap:14px;padding-block:6px}
+.res-top{display:flex;align-items:center;gap:14px}
+#rface{width:104px;flex:none}
+#rface svg{display:block;width:100%;height:auto}
+.bigstars{font-size:clamp(42px,10vw,62px);letter-spacing:5px;line-height:1}
+.prize{display:flex;align-items:center;gap:12px;background:var(--panel);border:2px solid var(--star);border-radius:13px;padding:12px 14px}
+.prize svg{width:58px;height:58px;flex:none;display:block}
+.prize b{font-family:var(--f-display);font-size:20px}
+.rstats{display:flex;flex-direction:column;gap:3px;font-size:17px}
+.rstats b{font-family:var(--f-num);font-weight:700;font-size:22px}
+/* 성적표 */
+.report{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:11px}
+.report h2{font-family:var(--f-display);font-size:19px}
+.rrow{display:grid;grid-template-columns:7.5em minmax(0,1fr) 3.4em;gap:10px;align-items:center}
+.rrow .nm{font-size:14px;font-weight:700}
+.rrow .track{display:block;height:16px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);overflow:hidden}
+.rrow .fillb{display:block;height:100%;border-radius:8px 0 0 8px;min-width:0}
+.rrow .sc{font-family:var(--f-num);font-weight:700;font-size:15px;text-align:right}
+.rrow.zero .sc{color:var(--muted)}
+.advice{font-size:15px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.advice b{color:var(--crim)}
+.review{display:flex;flex-direction:column;gap:8px}
+.review h2{font-family:var(--f-display);font-size:19px;margin-top:4px}
+details.rv{border:2px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+details.rv>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;padding:10px 13px;min-height:56px;font-family:var(--f-num);font-weight:700;font-size:17px}
+details.rv>summary::-webkit-details-marker{display:none}
+.rv-n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-body);font-size:13px;font-weight:700;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.rv-t{flex:none;font-family:var(--f-body);font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;color:#fff}
+.rv-q{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rv-m{flex:none;font-size:19px}
+.rv-m.ok{color:var(--good)}.rv-m.miss{color:var(--crim)}
+.rv-open{flex:none;font-family:var(--f-body);font-size:13px;font-weight:400;color:var(--muted)}
+details.rv[open] .rv-open::after{content:"닫기"}
+details.rv:not([open]) .rv-open::after{content:"해설"}
+.rv-b{padding:0 13px 13px;border-top:2px solid var(--line);margin-top:2px;padding-top:12px}
+
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes rise{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.shake{animation:shake .35s}
+.pop{animation:rise .4s}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+<style>
+/* 파일로 직접 열 때를 위한 기본값 (아티팩트에서는 플랫폼이 넣어 주는 부분) */
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px system-ui,-apple-system,sans-serif;background:#fafaf9}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <section id="home" class="screen">
+    <div class="head">
+      <div>
+        <span class="tag">소수 게임 4편 · 종합</span>
+        <h1>소수 챔피언십</h1>
+        <p class="sub">소수 알아보기, 크기 비교, 덧셈, 뺄셈이 <b>섞여서</b> 나와요. 한 판이 끝나면 유형별로 몇 개 맞혔는지 성적표를 보여 주고, 약한 유형만 모아 다시 낼 수도 있어요.</p>
+      </div>
+      <div class="head-r">
+        <div class="coins" aria-label="코인"><span class="coin"></span><b id="coinHome">0</b></div>
+        <button class="btn ghost small snd" type="button">소리 켜짐</button>
+      </div>
+    </div>
+    <div class="board" id="board"></div>
+    <div class="cards" id="cards"></div>
+    <p class="foot">한 판은 문제 8개이고 다섯 유형이 골고루 섞여 나와요. <b>맞혀도 해설이 펼쳐집니다.</b> 교과서 단원평가처럼 유형을 섞어 풀면 기억에 훨씬 오래 남아요.</p>
+  </section>
+
+  <section id="play" class="screen" hidden>
+    <div class="bar">
+      <button class="btn ghost small" id="back" type="button">← 처음으로</button>
+      <div class="bar-t"><span id="mName"></span><small id="lName"></small></div>
+      <div class="pips" id="pips" role="img"></div>
+      <span class="qn" id="qn"></span>
+      <div class="coins" aria-label="코인"><span class="coin"></span><b id="coinPlay">0</b></div>
+      <button class="btn ghost small snd" type="button">소리 켜짐</button>
+    </div>
+    <div class="work">
+      <div class="left">
+        <div id="face"></div>
+        <div class="bubble">
+          <div id="say"></div>
+          <div id="fb" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="stage" id="stage"></div>
+        <div class="sol" id="sol" hidden></div>
+        <div class="acts">
+          <button class="btn ghost" id="hintBtn" type="button">힌트 보기</button>
+          <button class="btn" id="next" type="button" hidden>다음 문제</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="result" class="screen" hidden>
+    <div class="res">
+      <div class="res-top">
+        <div id="rface"></div>
+        <div><h1 id="rTitle"></h1><p class="sub" id="rMsg"></p></div>
+      </div>
+      <div class="bigstars" id="rStars" role="img"></div>
+      <div class="prize" id="prize"></div>
+      <div class="rstats">
+        <span>첫 번에 맞힌 문제 <b id="rFirst"></b></span>
+        <span>이번에 번 코인 <b id="rCoins"></b></span>
+      </div>
+      <div class="report" id="report"></div>
+      <div class="review">
+        <h2>8문제 다시 보기</h2>
+        <div id="rList"></div>
+      </div>
+      <div class="acts">
+        <button class="btn go" id="again" type="button">한 번 더</button>
+        <button class="btn" id="weakBtn" type="button" hidden>약점만 모아 풀기</button>
+        <button class="btn ghost" id="toHome" type="button">처음으로</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+'use strict';
+// ==LOGIC-START==
+var rnd=function(a,b){return Math.floor(Math.random()*(b-a+1))+a};
+var pick=function(a){return a[Math.floor(Math.random()*a.length)]};
+var shuffle=function(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=rnd(0,i),t=a[i];a[i]=a[j];a[j]=t}return a};
+var jong=function(n){return [0,1,3,6,7,8].indexOf(Math.abs(n)%10)>=0};
+
+/* 소수는 1/100 단위 정수로 다룬다. {v,p} 는 v / 10^p */
+var POW=[1,10,100];
+function dec(v,p){return {v:v,p:p}}
+function str(o){
+  if(o.p===0) return ''+o.v;
+  var q=POW[o.p], i=Math.floor(o.v/q), f=o.v%q, s=''+f;
+  while(s.length<o.p) s='0'+s;
+  return i+'.'+s;
+}
+function hund(o){return o.v*POW[2-o.p]}
+function fromH(h){
+  if(h%100===0) return dec(h/100,0);
+  if(h%10===0) return dec(h/10,1);
+  return dec(h,2);
+}
+function digs(o){var h=hund(o);return [Math.floor(h/100),Math.floor(h/10)%10,h%10]}
+function josaNum(s,w,o){return jong(+s.charAt(s.length-1))?w:o}
+/* 한글 낱말 뒤 조사. 마지막 글자에 받침이 있는지로 고른다 */
+function josaKo(s,w,o){
+  var c=s.charCodeAt(s.length-1);
+  if(c<0xAC00||c>0xD7A3) return o;
+  return ((c-0xAC00)%28!==0)?w:o;
+}
+var KNUM=['영','일','이','삼','사','오','육','칠','팔','구'];
+function readKo(o){
+  var s=str(o),parts=s.split('.');
+  if(parts.length<2) return KNUM[+parts[0]];
+  return KNUM[+parts[0]]+' 점 '+parts[1].split('').map(function(c){return KNUM[+c]}).join('');
+}
+var PLACE=['일의 자리','소수 첫째 자리','소수 둘째 자리'];
+var UNITV=['1','0.1','0.01'];
+function placeVal(d,k){
+  if(d===0) return '0';
+  if(k===0) return ''+d;
+  return k===1?('0.'+d):('0.0'+d);
+}
+/* 받아내림 계산. 0 = 0.01 자리 */
+function borrowPlan(a,b){
+  var ha=hund(a),hb=hund(b);
+  var da=[ha%10,Math.floor(ha/10)%10,Math.floor(ha/100)%10];
+  var db=[hb%10,Math.floor(hb/10)%10,Math.floor(hb/100)%10];
+  var adj=[],res=[],changed=[],borrow=0,k,cur,n=0;
+  for(k=0;k<3;k++){
+    cur=da[k]-borrow;
+    if(cur<db[k]){cur+=10;borrow=1;n++}else borrow=0;
+    adj.push(cur);res.push(cur-db[k]);changed.push(cur!==da[k]);
+  }
+  return {adj:adj,res:res,changed:changed,borrows:n};
+}
+function carryCount(a,b){
+  var da=digs(a),db=digs(b),k,c=0,n=0;
+  for(k=2;k>=0;k--){var s=da[k]+db[k]+c;c=s>=10?1:0;if(c)n++}
+  return n;
+}
+/* 자리를 맞추지 않고 끝을 맞춰 계산한 값 */
+function misalign(a,b,isSub){
+  if(a.p===b.p) return null;
+  var sh=(a.p<b.p)?a:b, lo=(a.p<b.p)?b:a, moved=dec(sh.v,2);
+  if(sh.p===lo.p) return null;
+  var x=hund(moved), y=hund(lo);
+  if(isSub) return (a.p<b.p)?(x-y):(y-x);
+  return x+y;
+}
+/* 받아올림·받아내림을 잊은 값 */
+function flipDiff(a,b){
+  var da=digs(a),db=digs(b),i,h=0;
+  for(i=0;i<3;i++) h=h*10+Math.abs(da[i]-db[i]);
+  return h;
+}
+function noCarrySum(a,b){
+  var da=digs(a),db=digs(b),i,h=0;
+  for(i=0;i<3;i++) h=h*10+((da[i]+db[i])%10);
+  return h;
+}
+/* 0.30 처럼 끝자리가 0인 표기는 쓰지 않는다 */
+function okDisp(o){return o.p===0||o.v%10!==0}
+function distract(ansH,cands,need){
+  var out=[],seen=[ansH],i,k;
+  var ok=function(h){return h>0&&h<1000&&seen.indexOf(h)<0};
+  for(i=0;i<cands.length&&out.length<need;i++)
+    if(ok(cands[i])){seen.push(cands[i]);out.push(cands[i])}
+  for(k=1;out.length<need&&k<300;k++){
+    if(ok(ansH+k*10)){seen.push(ansH+k*10);out.push(ansH+k*10);continue}
+    if(ok(ansH-k*10)){seen.push(ansH-k*10);out.push(ansH-k*10);continue}
+    if(ok(ansH+k)){seen.push(ansH+k);out.push(ansH+k);continue}
+    if(ok(ansH-k)){seen.push(ansH-k);out.push(ansH-k)}
+  }
+  return out;
+}
+
+/* ---- 그림 ---- */
+function vcalc(a,b,op,sum,o){
+  o=o||{};
+  var frac=Math.max(a.p,b.p,sum?sum.p:0),i;
+  var il=function(n){return (''+Math.floor(n.v/POW[n.p])).length};
+  var intLen=Math.max(il(a),il(b),sum?il(sum):1);
+  var line=function(num,sign,cls,strike){
+    var s='<div class="vrow'+(cls?' '+cls:'')+'"><span class="op">'+(sign||'')+'</span>',j;
+    var ip=''+Math.floor(num.v/POW[num.p]);
+    while(ip.length<intLen) ip='0'+ip;
+    for(j=0;j<ip.length;j++){
+      var ci=2-(ip.length-1-j);
+      s+='<span class="cell'+(strike&&ci>=0&&ci<=2&&strike[ci]?' struck':'')+'">'+ip.charAt(j)+'</span>';
+    }
+    s+='<span class="cell dot">.</span>';
+    var fs=''+(num.v%POW[num.p]);
+    while(fs.length<num.p) fs='0'+fs;
+    for(j=0;j<frac;j++){
+      var cf=1-j;
+      s+='<span class="cell'+(j<num.p?'':' pad')+(strike&&cf>=0&&strike[cf]?' struck':'')+'">'+(j<num.p?fs.charAt(j):'0')+'</span>';
+    }
+    return s+'</div>';
+  };
+  var h='<div class="vsum">';
+  if(o.plan){
+    h+='<div class="vrow adj"><span class="op"></span>';
+    var cells=[],j2;
+    for(j2=0;j2<intLen;j2++){
+      var ci2=2-(intLen-1-j2);
+      cells.push({dot:false,txt:(ci2>=0&&ci2<=2&&o.plan.changed[ci2])?(''+o.plan.adj[ci2]):''});
+    }
+    cells.push({dot:true,txt:''});
+    for(j2=0;j2<frac;j2++){
+      var cf2=1-j2;
+      cells.push({dot:false,txt:(cf2>=0&&o.plan.changed[cf2])?(''+o.plan.adj[cf2]):''});
+    }
+    for(j2=0;j2<cells.length;j2++)
+      h+='<span class="cell'+(cells[j2].dot?' dot':'')+(cells[j2].txt?'':' blank')+'">'+(cells[j2].txt||'0')+'</span>';
+    h+='</div>';
+  }
+  h+=line(a,'',null,o.plan?o.plan.changed:null);
+  h+=line(b,op==='+'?'+':'−');
+  h+='<div class="vline"></div>';
+  if(sum) h+=line(sum,'','sum');
+  return h+'</div>';
+}
+function pvTable(o,hi,showVal){
+  var k,h='<div class="tw"><table class="pv"><thead><tr><th></th>';
+  for(k=0;k<=o.p;k++) h+='<th'+(k===hi?' class="hi"':'')+'>'+PLACE[k]+'</th>';
+  h+='</tr></thead><tbody><tr><td class="lab">숫자</td>';
+  var d=digs(o);
+  for(k=0;k<=o.p;k++) h+='<td'+(k===hi?' class="hi"':'')+'>'+d[k]+'</td>';
+  h+='</tr>';
+  if(showVal){
+    h+='<tr><td class="lab">나타내는 값</td>';
+    for(k=0;k<=o.p;k++) h+='<td class="'+(k===hi?'hi':'dim')+'">'+placeVal(d[k],k)+'</td>';
+    h+='</tr>';
+  }
+  return h+'</tbody></table></div>';
+}
+function cmpTable(list){
+  var i,k,h='<div class="tw"><table class="pv"><thead><tr><th></th>';
+  for(k=0;k<3;k++) h+='<th>'+PLACE[k]+'</th>';
+  h+='</tr></thead><tbody>';
+  var diff=-1;
+  for(k=0;k<3&&diff<0;k++){
+    var first=digs(list[0])[k];
+    for(i=1;i<list.length;i++) if(digs(list[i])[k]!==first){diff=k;break}
+  }
+  for(i=0;i<list.length;i++){
+    var d=digs(list[i]);
+    h+='<tr><td class="lab">'+str(list[i])+'</td>';
+    for(k=0;k<3;k++) h+='<td class="'+(k===diff?'hi':(k>list[i].p?'dim':''))+'">'+d[k]+'</td>';
+    h+='</tr>';
+  }
+  h+='</tbody></table></div>';
+  if(diff>=0) h+='<p style="margin-top:7px;font-size:15px;color:var(--muted)">'+PLACE[diff]+'에서 처음으로 숫자가 달라져요. 거기서 승부가 납니다.</p>';
+  return h;
+}
+
+/* ---- 유형별 문제 ---- */
+var TYPES=['read','compare','add','sub','chain'];
+var TNAME={read:'소수 알아보기',compare:'크기 비교',add:'덧셈',sub:'뺄셈',chain:'섞인 계산'};
+var TGAME={read:'1편 소수 보석 공방',compare:'1편 소수 보석 공방',add:'2편 소수 기차 여행',
+           sub:'3편 소수 로켓 연료소',chain:'2편·3편'};
+
+/* 1. 소수 알아보기 */
+function qRead(lv){
+  var p=(lv===1?1:2), kind, o, q, k, guard=0;
+  kind=(lv===1)?pick(['digit','word']):pick(['digit','word','value','frac']);
+  do{
+    guard++;
+    o=(p===1)?dec(rnd(1,99),1):dec(rnd(11,999),2);
+  }while(guard<60&&!okDisp(o));
+  /* 분수로 바꾸는 문제는 1보다 작은 수로 내야 진분수가 된다 (47/100 꼴) */
+  if(kind==='frac') o=(p===1)?dec(rnd(1,9),1):dec(rnd(0,9)*10+rnd(1,9),2);
+  q={type:'read',sub:kind,o:o,p:o.p,key:'rd'+kind+hund(o)};
+  var d=digs(o);
+  if(kind==='digit'){
+    k=rnd(1,o.p); q.k=k;
+    q.qHTML='<span>'+str(o)+'</span>';
+    q.question=PLACE[k]+' 숫자는 무엇일까요?';
+    q.label=str(o)+' 의 '+PLACE[k];
+    var pool=[];
+    for(var j=0;j<=o.p;j++) if(j!==k) pool.push(d[j]);
+    pool.push((d[k]+1)%10);pool.push((d[k]+2)%10);pool.push((d[k]+5)%10);pool.push((d[k]+7)%10);
+    q.choices=shuffle([{t:''+d[k],correct:true}].concat(
+      uniqTexts(pool.map(String),[''+d[k]],2).map(function(x){return {t:x,correct:false}})));
+    q.steps=[
+      {t:'자리 이름을 세어요',b:'<p>소수점 바로 오른쪽이 <b>소수 첫째 자리</b>, 그다음이 둘째 자리예요.</p>',fig:pvTable(o,-1,false)},
+      {t:'그 자리를 짚어요',b:'<p>'+PLACE[k]+'에 있는 숫자는 <span class="num">'+d[k]+'</span>'+josaNum(''+d[k],'이에요','예요')+'.</p>',
+       fig:pvTable(o,k,false),reveal:true}
+    ];
+  }else if(kind==='value'){
+    do{k=rnd(1,o.p)}while(d[k]===0);
+    q.k=k;
+    var pv=placeVal(d[k],k), ansH=hund(fromH(k===1?d[k]*10:d[k]));
+    q.qHTML='<span>'+str(o)+'</span>';
+    q.question='<b class="num">'+d[k]+'</b>'+josaNum(''+d[k],'이','가')+' 나타내는 값은 얼마일까요?';
+    q.label=str(o)+' 에서 '+d[k]+'의 값';
+    var cands2=[''+d[k],placeVal(d[k],1),placeVal(d[k],2),placeVal(d[k],0)];
+    q.choices=shuffle([{t:pv,correct:true}].concat(
+      uniqTexts(cands2,[pv],2).map(function(x){return {t:x,correct:false}})));
+    q.steps=[
+      {t:'어느 자리인가요',b:'<p><span class="num">'+d[k]+'</span>'+josaNum(''+d[k],'은','는')+' <b>'+PLACE[k]+'</b>에 있어요.</p>',fig:pvTable(o,k,false)},
+      {t:'그 자리의 한 칸은',b:'<p>'+PLACE[k]+'의 한 칸은 <b>'+UNITV[k]+'</b>이에요.</p>'
+        +'<span class="eqn">'+UNITV[k]+' × '+d[k]+' = '+pv+'</span>',fig:pvTable(o,k,true),reveal:true}
+    ];
+  }else if(kind==='word'){
+    q.qHTML='<span class="word">'+readKo(o)+'</span>';
+    q.question='이 수를 숫자로 쓰면?';
+    q.label='"'+readKo(o)+'" 쓰기';
+    var H=hund(o),c3=[];
+    if(o.p===2) c3.push(hund(dec(o.v,1))); else c3.push(hund(dec(o.v,2)));
+    c3.push(H+10);c3.push(H-10);c3.push(H+1);
+    q.choices=shuffle([{t:str(o),correct:true}].concat(
+      distract(H,c3,2).map(function(x){return {t:str(fromH(x)),correct:false}})));
+    q.steps=[
+      {t:'점 앞뒤를 나눠 읽어요',b:'<p>“<b>'+readKo(o)+'</b>”에서 <b>점</b> 앞은 일의 자리, 점 뒤는 숫자를 <b>한 자리씩</b> 읽은 거예요.</p>'},
+      {t:'자리에 넣으면',b:'<p><span class="num">'+str(o)+'</span>'+josaNum(str(o),'이에요','예요')+'. 0도 빼먹지 말고 자리를 지켜 주세요.</p>',
+       fig:pvTable(o,-1,false),reveal:true}
+    ];
+  }else{
+    var den=(o.p===2)?100:10, num=hund(o)/(o.p===2?1:10);
+    q.qHTML='<span>'+num+'/'+den+'</span>';
+    q.question='이 분수를 소수로 쓰면?';
+    q.label=num+'/'+den+' → 소수';
+    var H4=hund(o),c4=[];
+    c4.push(o.p===2?hund(dec(o.v,1)):hund(dec(o.v,2)));
+    c4.push(H4+10);c4.push(H4-10);c4.push(H4+1);
+    q.choices=shuffle([{t:str(o),correct:true}].concat(
+      distract(H4,c4,2).map(function(x){return {t:str(fromH(x)),correct:false}})));
+    q.steps=[
+      {t:'분모가 자릿수를 알려 줘요',b:'<p>분모가 <b>'+den+'</b>이면 소수 <b>'+(den===100?'두':'한')+' 자리 수</b>가 돼요. '
+        +'한 칸이 '+(den===100?'0.01':'0.1')+'이니까요.</p>'},
+      {t:'분자는 칸 수',b:'<span class="eqn">'+num+'/'+den+' = '+(den===100?'0.01':'0.1')+' × '+num+' = '+str(o)+'</span>',reveal:true}
+    ];
+  }
+  return q;
+}
+function uniqTexts(cands,seen,need){
+  var out=[],i;
+  for(i=0;i<cands.length&&out.length<need;i++)
+    if(seen.indexOf(cands[i])<0){seen.push(cands[i]);out.push(cands[i])}
+  var k=0;
+  while(out.length<need&&k<60){
+    var t=''+((+seen[0]||0)+k);
+    if(seen.indexOf(t)<0){seen.push(t);out.push(t)}
+    k++;
+  }
+  return out;
+}
+
+/* 2. 크기 비교 — 세 수 중 가장 큰/작은 수 */
+function qCompare(lv){
+  var list=[],guard=0,want=(lv===1)?'big':pick(['big','small']);
+  var mk=function(){
+    if(lv===1) return dec(rnd(11,89),1);
+    if(lv===2) return (Math.random()<.5)?dec(rnd(11,89),1):dec(rnd(101,899),2);
+    var base=rnd(0,2);
+    return (Math.random()<.4)?fromH(base*100+rnd(1,9)*10):fromH(base*100+rnd(11,99));
+  };
+  while(list.length<3&&guard<300){
+    guard++;
+    var c=mk();
+    if(!okDisp(c)) continue;
+    var dup=false,i;
+    for(i=0;i<list.length;i++) if(hund(list[i])===hund(c)) dup=true;
+    if(!dup) list.push(c);
+  }
+  var fk=1;
+  while(list.length<3){ var c2=fromH(11+fk); if(!list.some(function(x){return hund(x)===hund(c2)})) list.push(c2); fk++; }
+  var sorted=list.slice().sort(function(x,y){return hund(x)-hund(y)});
+  var target=(want==='big')?sorted[2]:sorted[0];
+  var q={type:'compare',list:list,want:want,ans:target,key:'cp'+list.map(function(x){return hund(x)}).join('_')+want};
+  q.qHTML=list.map(function(x){return '<span>'+str(x)+'</span>'}).join('<span class="op">·</span>');
+  q.question=(want==='big'?'가장 큰 수':'가장 작은 수')+'는 어느 것일까요?';
+  q.label=list.map(function(x){return str(x)}).join(' · ')+' 중 '+(want==='big'?'최대':'최소');
+  q.choices=shuffle(list.map(function(x){return {t:str(x),correct:hund(x)===hund(target)}}));
+  q.steps=[
+    {t:'자리를 맞춰 세워요',b:'<p>자릿수가 다르면 뒤에 <b>0</b>을 채워 길이를 맞춰요. 0.4 = 0.40 이니까 값은 그대로예요.</p>',
+     fig:cmpTable(list)},
+    {t:'앞자리부터 비교해요',b:'<p>일의 자리 → 소수 첫째 → 둘째 순서로 보다가, <b>처음 달라지는 자리</b>에서 '
+      +(want==='big'?'큰':'작은')+' 쪽이 답이에요. 숫자가 많다고 큰 수가 아니에요.</p>'},
+    {t:'줄을 세우면',b:'<span class="eqn">'+sorted.map(function(x){return str(x)}).join(' &lt; ')+'</span>'
+      +'<p style="margin-top:8px">그래서 '+(want==='big'?'가장 큰':'가장 작은')+' 수는 <span class="num">'+str(target)+'</span>'
+      +josaNum(str(target),'이에요','예요')+'.</p>',reveal:true}
+  ];
+  return q;
+}
+
+/* 3. 덧셈 */
+function qAdd(lv){
+  var a,b,guard=0,sum;
+  do{
+    guard++;
+    if(lv===1){ var d1=rnd(1,8); a=dec(d1,1); b=dec(rnd(1,9-d1),1); }
+    else if(lv===2){
+      if(Math.random()<.5){ var e=rnd(2,9); a=dec(e,1); b=dec(rnd(11-e,9),1); }
+      else { a=dec(rnd(11,89),2); b=dec(rnd(11,89),2); }
+    }else{
+      a=fromH(rnd(11,299)); b=fromH(rnd(11,99));
+    }
+    sum=fromH(hund(a)+hund(b));
+  }while(guard<80&&!(hund(sum)>0&&hund(sum)<1000&&okDisp(a)&&okDisp(b)
+    &&(lv===1?(a.p===1&&b.p===1&&hund(sum)<100):(lv===2?(a.p===b.p):(a.p!==b.p)))));
+  var H=hund(sum);
+  var q={type:'add',a:a,b:b,ans:sum,key:'ad'+hund(a)+'_'+hund(b)};
+  q.qHTML='<span>'+str(a)+'</span><span class="op">+</span><span>'+str(b)+'</span><span class="op">=</span><span class="q">?</span>';
+  q.question='두 수를 더하면 얼마일까요?';
+  q.label=str(a)+' + '+str(b);
+  var cands=[],mis=misalign(a,b,false);
+  if(mis!==null) cands.push(mis);
+  var nc=noCarrySum(a,b); if(nc!==H) cands.push(nc);
+  cands.push(H+10);cands.push(H-10);cands.push(H+1);cands.push(H+100);
+  q.choices=shuffle([{t:str(sum),correct:true}].concat(
+    distract(H,cands,2).map(function(x){return {t:str(fromH(x)),correct:false}})));
+  var carries=carryCount(a,b);
+  q.steps=[
+    {t:'소수점을 맞춰 세워요',b:'<p>덧셈은 <b>소수점끼리 세로로</b> 맞추는 것이 먼저예요.'
+      +(a.p!==b.p?' 짧은 쪽 빈 자리에는 <b>0</b>을 채워요.':'')+'</p>',
+     fig:'<div class="fig">'+vcalc(a,b,'+',null)+'</div>'},
+    {t:'끝자리부터 더해요',b:'<p>오른쪽 끝자리부터 더하고, '+(carries?'10이 넘으면 윗자리로 <b>1을 올려</b>요.':'올릴 것이 없으면 그대로 적어요.')+'</p>'
+      +'<span class="eqn">'+str(a)+' + '+str(b)+' = '+str(sum)+'</span>'},
+    {t:'소수점은 그대로',b:'<p>답의 소수점은 <b>위에 맞춰 둔 자리 그대로</b> 내려 찍어요.</p>',
+     fig:'<div class="fig">'+vcalc(a,b,'+',sum)+'</div>',reveal:true}
+  ];
+  return q;
+}
+
+/* 4. 뺄셈 */
+function qSub(lv){
+  var a,b,guard=0,plan,diff;
+  do{
+    guard++;
+    if(lv===1){ var t=rnd(2,9); a=dec(t,1); b=dec(rnd(1,t-1),1); }
+    else if(lv===2){
+      if(Math.random()<.5){ var o2=rnd(1,3), t2=rnd(1,8); a=fromH(o2*100+t2*10); b=fromH(rnd(0,o2-1)*100+rnd(t2+1,9)*10); }
+      else { var u1=rnd(1,8), u2=rnd(u1+1,9), s1=rnd(1,9), s2=rnd(0,s1-1); a=dec(s1*10+u1,2); b=dec(s2*10+u2,2); }
+    }else{ a=fromH(rnd(100,390)); b=fromH(rnd(11,99)); }
+    plan=borrowPlan(a,b);
+    diff=fromH(hund(a)-hund(b));
+  }while(guard<80&&!(hund(a)>hund(b)&&okDisp(a)&&okDisp(b)
+    &&(lv===1?(plan.borrows===0&&a.p===1&&b.p===1):(lv===2?(plan.borrows>=1&&a.p===b.p):(a.p!==b.p)))));
+  var H=hund(diff);
+  var q={type:'sub',a:a,b:b,ans:diff,plan:plan,key:'sb'+hund(a)+'_'+hund(b)};
+  q.qHTML='<span>'+str(a)+'</span><span class="op">−</span><span>'+str(b)+'</span><span class="op">=</span><span class="q">?</span>';
+  q.question='두 수를 빼면 얼마일까요?';
+  q.label=str(a)+' − '+str(b);
+  var cands=[],fd=flipDiff(a,b);
+  if(fd!==H) cands.push(fd);
+  var mis=misalign(a,b,true); if(mis!==null&&mis>0) cands.push(mis);
+  cands.push(H+10);cands.push(H-10);cands.push(H+1);cands.push(H+100);
+  q.choices=shuffle([{t:str(diff),correct:true}].concat(
+    distract(H,cands,2).map(function(x){return {t:str(fromH(x)),correct:false}})));
+  q.steps=[
+    {t:'소수점을 맞춰 세워요',b:'<p>뺄셈도 <b>소수점끼리 세로로</b> 맞춰요.'
+      +(a.p!==b.p?' 짧은 쪽 빈 자리에는 <b>0</b>을 채워요.':'')+'</p>',
+     fig:'<div class="fig">'+vcalc(a,b,'-',null)+'</div>'},
+    (plan.borrows>0
+      ? {t:'모자라면 윗자리에서 빌려요',b:'<p>뺄 수 없는 자리는 <b>바로 윗자리에서 1을 빌려</b> 10으로 바꿔 써요. 윗자리는 1이 줄어듭니다.</p>'
+          +'<span class="eqn">'+(plan.changed[0]?'0.1 = 0.01 × 10':'1 = 0.1 × 10')+'</span>'}
+      : {t:'빌려올 것이 없어요',b:'<p>모든 자리에서 위 숫자가 더 크거나 같아요. 그대로 빼면 돼요.</p>'}),
+    {t:'끝자리부터 빼요',b:'<span class="eqn">'+str(a)+' − '+str(b)+' = '+str(diff)+'</span>',
+     fig:'<div class="fig">'+vcalc(a,b,'-',diff,{plan:plan.borrows>0?plan:null})+'</div>',reveal:true}
+  ];
+  if(fd!==H&&plan.borrows>0)
+    q.steps.push({t:'이렇게 틀리기 쉬워요',b:'<p>빌려오지 않고 큰 숫자에서 작은 숫자를 그냥 빼면 '+str(fromH(fd))
+      +josaNum(str(fromH(fd)),'이','가')+' 나와요.</p>',reveal:true});
+  return q;
+}
+
+/* 5. 섞인 계산 — 세 수 */
+function qChain(lv){
+  var a,b,c,op1,op2,mid,fin,guard=0;
+  do{
+    guard++;
+    op1='+';op2=(lv===1)?'+':pick(['+','-']);
+    if(lv===1){ a=dec(rnd(1,4),1); b=dec(rnd(1,3),1); c=dec(rnd(1,3),1); }
+    else if(lv===2){
+      if(Math.random()<.5){ a=dec(rnd(3,9),1); b=dec(rnd(1,9),1); c=dec(rnd(1,9),1); }
+      else { a=dec(rnd(21,89),2); b=dec(rnd(11,69),2); c=dec(rnd(11,69),2); }
+      if(Math.random()<.5) op1='-';
+    }else{
+      a=fromH(rnd(100,299)); b=fromH(rnd(11,99)); c=fromH(rnd(11,99));
+      if(Math.random()<.5) op1='-';
+    }
+    mid=fromH(op1==='+'?hund(a)+hund(b):hund(a)-hund(b));
+    fin=fromH(op2==='+'?hund(mid)+hund(c):hund(mid)-hund(c));
+  }while(guard<90&&!(hund(mid)>0&&hund(fin)>0&&hund(mid)<1000&&hund(fin)<1000
+    &&okDisp(a)&&okDisp(b)&&okDisp(c)
+    &&(lv===1||op1==='-'||op2==='-')));
+  var H=hund(fin);
+  var q={type:'chain',a:a,b:b,c:c,op1:op1,op2:op2,mid:mid,ans:fin,key:'ch'+hund(a)+op1+hund(b)+op2+hund(c)};
+  q.qHTML='<span>'+str(a)+'</span><span class="op">'+(op1==='+'?'+':'−')+'</span><span>'+str(b)+'</span>'
+    +'<span class="op">'+(op2==='+'?'+':'−')+'</span><span>'+str(c)+'</span><span class="op">=</span><span class="q">?</span>';
+  q.question='앞에서부터 차례로 계산하면 얼마일까요?';
+  q.label=str(a)+' '+(op1==='+'?'+':'−')+' '+str(b)+' '+(op2==='+'?'+':'−')+' '+str(c);
+  var cands=[hund(mid)];                                  /* 중간까지만 계산 */
+  cands.push(op2==='+'?hund(a)+hund(c):Math.abs(hund(a)-hund(c)));
+  cands.push(H+10);cands.push(H-10);cands.push(H+1);
+  q.choices=shuffle([{t:str(fin),correct:true}].concat(
+    distract(H,cands,2).map(function(x){return {t:str(fromH(x)),correct:false}})));
+  var p1=borrowPlan(a,b), p2=borrowPlan(mid,c);
+  q.steps=[
+    {t:'앞에서부터 둘씩',b:'<p>세 수가 있어도 <b>앞에서부터 두 개씩</b> 차례로 계산하면 돼요. 한 번에 다 하려고 하면 틀리기 쉬워요.</p>'},
+    {t:'먼저 '+(op1==='+'?'더해요':'빼요'),b:'<span class="eqn">'+str(a)+' '+(op1==='+'?'+':'−')+' '+str(b)+' = '+str(mid)+'</span>',
+     fig:'<div class="fig">'+vcalc(a,b,op1,mid,{plan:(op1==='-'&&p1.borrows>0)?p1:null})+'</div>'},
+    {t:'그 결과에 이어서',b:'<p>나온 '+str(mid)+josaNum(str(mid),'을','를')+' 가지고 다음 수를 '+(op2==='+'?'더해요':'빼요')+'.</p>'
+      +'<span class="eqn">'+str(mid)+' '+(op2==='+'?'+':'−')+' '+str(c)+' = '+str(fin)+'</span>',
+     fig:'<div class="fig">'+vcalc(mid,c,op2,fin,{plan:(op2==='-'&&p2.borrows>0)?p2:null})+'</div>',reveal:true}
+  ];
+  return q;
+}
+
+var QGEN={read:qRead,compare:qCompare,add:qAdd,sub:qSub,chain:qChain};
+/* 한 판에 낼 8문제의 유형을 고른다. weights 가 있으면 약한 유형을 더 자주. */
+function buildBag(total,weights){
+  var bag=[],i;
+  if(!weights){
+    bag=TYPES.slice();                                    /* 다섯 유형 최소 한 번씩 */
+    while(bag.length<total) bag.push(pick(TYPES));
+    return shuffle(bag);
+  }
+  var pool=[];
+  for(i=0;i<TYPES.length;i++){
+    var w=Math.max(1,Math.round(weights[TYPES[i]]*10));
+    for(var j=0;j<w;j++) pool.push(TYPES[i]);
+  }
+  for(i=0;i<total;i++) bag.push(pick(pool));
+  return bag;
+}
+// ==LOGIC-END==
+
+/* ---- 저장 ---- */
+var KEY='decimal-champ-v1';
+var save={coins:0,stars:{},trophies:{gold:0,silver:0,bronze:0},stats:{},sound:true};
+TYPES.forEach(function(t){save.stats[t]={ok:0,n:0}});
+try{
+  var raw=localStorage.getItem(KEY);
+  if(raw){var so=JSON.parse(raw);if(so&&typeof so==='object'){
+    save.coins=+so.coins||0;save.stars=so.stars||{};save.sound=so.sound!==false;
+    if(so.trophies){['gold','silver','bronze'].forEach(function(k){save.trophies[k]=+so.trophies[k]||0})}
+    if(so.stats) TYPES.forEach(function(t){
+      if(so.stats[t]){save.stats[t]={ok:+so.stats[t].ok||0,n:+so.stats[t].n||0}}
+    });
+  }}
+}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}}
+
+var $=function(s){return document.querySelector(s)};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+
+/* ---- 트로피 진행자 ---- */
+function trophy(mood,plain){
+  var g='var(--gold)', ink='#2A2208';
+  var h='<svg viewBox="0 0 120 130" role="img" aria-label="트로피">';
+  h+='<ellipse cx="60" cy="124" rx="30" ry="5" fill="'+ink+'" opacity=".12"/>';
+  h+='<rect x="38" y="106" width="44" height="12" rx="4" fill="'+g+'"/>';
+  h+='<rect x="50" y="92" width="20" height="16" fill="'+g+'"/>';
+  h+='<path d="M28 18 h64 v26 a32 32 0 0 1 -64 0z" fill="'+g+'"/>';
+  h+='<path d="M28 24 h-14 a16 16 0 0 0 16 22z" fill="none" stroke="'+g+'" stroke-width="6"/>';
+  h+='<path d="M92 24 h14 a16 16 0 0 1 -16 22z" fill="none" stroke="'+g+'" stroke-width="6"/>';
+  if(!plain){
+    var eye=function(x,y){
+      if(mood==='happy') return '<path d="M'+(x-6)+' '+(y+2)+' Q'+x+' '+(y-7)+' '+(x+6)+' '+(y+2)+'" fill="none" stroke="'+ink+'" stroke-width="3.4" stroke-linecap="round"/>';
+      if(mood==='oops') return '<path d="M'+(x-5)+' '+(y-4)+' L'+(x+5)+' '+(y+3)+'M'+(x-5)+' '+(y+3)+' L'+(x+5)+' '+(y-4)+'" stroke="'+ink+'" stroke-width="3" stroke-linecap="round"/>';
+      return '<circle cx="'+x+'" cy="'+y+'" r="4.4" fill="'+ink+'"/>';
+    };
+    h+=eye(48,38)+eye(72,38);
+    if(mood==='happy') h+='<path d="M49 52 Q60 66 71 52 Z" fill="#6B2016"/>';
+    else if(mood==='oops') h+='<path d="M50 58 Q60 50 70 58" fill="none" stroke="'+ink+'" stroke-width="3.2" stroke-linecap="round"/>';
+    else h+='<path d="M50 52 Q60 61 70 52" fill="none" stroke="'+ink+'" stroke-width="3.2" stroke-linecap="round"/>';
+  }
+  return h+'</svg>';
+}
+var TROPHY={gold:{n:'금 트로피',c:'var(--gold)'},silver:{n:'은 트로피',c:'#9AA7B4'},bronze:{n:'동 트로피',c:'#B07A45'}};
+function trophySVG(kind){
+  var c=TROPHY[kind].c;
+  return '<svg viewBox="0 0 120 130" role="img" aria-label="'+TROPHY[kind].n+'">'
+    +'<rect x="38" y="106" width="44" height="12" rx="4" fill="'+c+'"/>'
+    +'<rect x="50" y="92" width="20" height="16" fill="'+c+'"/>'
+    +'<path d="M28 18 h64 v26 a32 32 0 0 1 -64 0z" fill="'+c+'"/>'
+    +'<path d="M28 24 h-14 a16 16 0 0 0 16 22z" fill="none" stroke="'+c+'" stroke-width="6"/>'
+    +'<path d="M92 24 h14 a16 16 0 0 1 -16 22z" fill="none" stroke="'+c+'" stroke-width="6"/></svg>';
+}
+
+/* ---- 소리 ---- */
+var AC=null;
+function tone(seq){
+  if(!save.sound) return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended') AC.resume();
+    var t0=AC.currentTime;
+    seq.forEach(function(s){
+      var o=AC.createOscillator(),g=AC.createGain();
+      o.type='triangle';o.frequency.value=s[0];
+      g.gain.setValueAtTime(0.0001,t0+s[1]);
+      g.gain.exponentialRampToValueAtTime(0.15,t0+s[1]+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+s[1]+s[2]);
+      o.connect(g);g.connect(AC.destination);
+      o.start(t0+s[1]);o.stop(t0+s[1]+s[2]+0.05);
+    });
+  }catch(e){}
+}
+var SND={good:[[659,0,.13],[988,.11,.25]],bad:[[208,0,.27]],tap:[[523,0,.05]],
+  win:[[523,0,.13],[659,.11,.13],[784,.22,.13],[1047,.33,.3],[1319,.5,.4]]};
+function paintSound(){$$('.snd').forEach(function(b){b.textContent=save.sound?'소리 켜짐':'소리 꺼짐'})}
+
+/* ---- 코스 ---- */
+var COURSES={
+  basic:{n:1,name:'기초 코스',desc:'소수 한 자리 중심. 받아올림·받아내림 없이 기본기를 확인해요.',lv:1},
+  skill:{n:2,name:'실력 코스',desc:'소수 두 자리까지. 받아올림과 받아내림이 들어갑니다.',lv:2},
+  chal:{n:3,name:'도전 코스',desc:'자릿수가 다른 계산과 세 수 섞인 식까지 나와요.',lv:3},
+  weak:{n:'★',name:'약점 집중',desc:'지금까지 많이 틀린 유형을 더 자주 냅니다. 한 판 이상 푼 뒤에 열려요.',lv:0}
+};
+var CORDER=['basic','skill','chal','weak'];
+var GOOD=['정확해요!','챔피언 후보!','정답이에요!','우와, 바로 맞혔네요!','관중석이 들썩여요!','완벽해요!'];
+var OOPS=['앗, 다시 볼까요?','조금만 더 생각해 봐요.','괜찮아요, 해설을 같이 봐요.','거의 다 왔어요!'];
+
+/* ---- 화면 ---- */
+var starsHTML=function(s){return [1,2,3].map(function(i){return '<span class="st'+(i<=s?' on':'')+'">★</span>'}).join('')};
+function show(id){
+  ['home','play','result'].forEach(function(s){$('#'+s).hidden=(s!==id)});
+  $('#'+id).scrollTop=0;
+}
+function paintCoins(){$('#coinHome').textContent=save.coins;$('#coinPlay').textContent=save.coins}
+function totalPlayed(){var n=0;TYPES.forEach(function(t){n+=save.stats[t].n});return n}
+function accOf(t){var s=save.stats[t];return s.n?s.ok/s.n:null}
+function weakestTypes(){
+  var arr=TYPES.filter(function(t){return save.stats[t].n>0});
+  arr.sort(function(x,y){return accOf(x)-accOf(y)});
+  return arr;
+}
+function weakLevel(){
+  var ok=0,n=0;
+  TYPES.forEach(function(t){ok+=save.stats[t].ok;n+=save.stats[t].n});
+  if(!n) return 2;
+  var r=ok/n;
+  return r>=0.8?3:(r>=0.55?2:1);
+}
+function renderBoard(){
+  var played=totalPlayed();
+  var cells=TYPES.map(function(t){
+    var a=accOf(t);
+    return '<div class="bstat"><span class="k">'+TNAME[t]+'</span><span class="v'+(a===null?' dim':'')+'">'
+      +(a===null?'–':(Math.round(a*100)+'%'))+'</span></div>';
+  }).join('');
+  $('#board').innerHTML='<span class="board-t">기록판</span>'+cells
+    +'<div class="bstat"><span class="k">푼 문제</span><span class="v">'+played+'</span></div>';
+}
+function renderHome(){
+  paintCoins();paintSound();renderBoard();
+  var locked=(totalPlayed()<8);
+  $('#cards').innerHTML=CORDER.map(function(ck){
+    var C=COURSES[ck], s=save.stars[ck]||0;
+    var dis=(ck==='weak'&&locked);
+    return '<article class="card'+(ck==='weak'?' weak':'')+'">'
+      +'<div class="ctop"><div class="cnum">'+C.n+'</div><h2>'+C.name+'</h2></div>'
+      +'<p>'+C.desc+'</p>'
+      +'<div class="crow"><span class="stars" role="img" aria-label="별 '+s+'개">'+starsHTML(s)+'</span></div>'
+      +'<button class="btn'+(ck==='weak'?' go':'')+' wide" type="button" data-course="'+ck+'"'+(dis?' disabled style="opacity:.4"':'')+'>'
+      +(dis?'아직 잠겨 있어요':'시작하기')+'</button></article>';
+  }).join('');
+}
+
+/* ---- 게임 ---- */
+var G=null;
+function startGame(course){
+  var C=COURSES[course];
+  var lv=(course==='weak')?weakLevel():C.lv;
+  var weights=null;
+  if(course==='weak'){
+    weights={};
+    TYPES.forEach(function(t){
+      var a=accOf(t);
+      weights[t]=(a===null)?0.5:(1-a)+0.15;              /* 못 맞힌 비율이 높을수록 자주 */
+    });
+  }
+  G={course:course,lv:lv,i:0,total:8,first:0,streak:0,earned:0,results:[],used:{},log:[],q:null,wrong:0,done:false,
+     bag:buildBag(8,weights),round:{},trophy:0};
+  TYPES.forEach(function(t){G.round[t]={ok:0,n:0}});
+  $('#mName').textContent=C.name;
+  $('#lName').textContent=(course==='weak')
+    ? ('약한 유형 위주 · 난이도 '+lv+'단계')
+    : (lv+'단계 난이도 · 다섯 유형 섞어 풀기');
+  show('play');
+  nextQ();
+}
+function setFace(mood){$('#face').innerHTML=trophy(mood)}
+function fb(t,c){var e=$('#fb');e.innerHTML=t||'';e.className=c||''}
+function renderPips(){
+  $('#pips').innerHTML=Array.from({length:G.total},function(_,i){
+    return '<i class="pip '+(G.results[i]||'')+(i===G.i?' cur':'')+'"></i>';
+  }).join('');
+  $('#pips').setAttribute('aria-label',(G.i+1)+' / '+G.total+'번째 문제');
+  $('#qn').textContent=(G.i+1)+' / '+G.total;
+}
+function stepsHTML(steps){
+  return '<div class="steps">'+steps.map(function(s){
+    return '<div class="step"><div class="sb"><h3>'+s.t+'</h3>'+s.b+(s.fig||'')+'</div></div>';
+  }).join('')+'</div>';
+}
+function renderSol(full,won){
+  var steps=G.q.steps.filter(function(s){return full||!s.reveal});
+  if(!steps.length){$('#sol').hidden=true;return}
+  $('#sol').hidden=false;
+  var head=full?(won?'정답! 왜 그런지 같이 볼까요':'해설'):'힌트';
+  var pill=full?(won?'맞혀도 해설은 꼭 보기':'끝까지 같이 풀어 봐요'):'여기까지만 알려줄게요';
+  $('#sol').innerHTML='<div class="sol-h"><span>'+head+'</span><span class="pill">'+pill+'</span></div>'+stepsHTML(steps);
+}
+function hideSol(){$('#sol').hidden=true;$('#sol').innerHTML=''}
+
+function nextQ(){
+  G.done=false;G.wrong=0;
+  var type=G.bag[G.i]||pick(TYPES);
+  var q,tries=0;
+  do{q=QGEN[type](G.lv);tries++}while(G.used[q.key]&&tries<60);
+  G.used[q.key]=1;G.q=q;
+  setFace('idle');fb('');hideSol();
+  $('#next').hidden=true;$('#hintBtn').hidden=false;
+  renderQ();renderPips();paintCoins();
+}
+function renderQ(){
+  var q=G.q;
+  var isWord=q.choices.some(function(c){return /[가-힣]/.test(c.t)});
+  var h='<span class="tchip '+q.type+'">'+TNAME[q.type]+'</span>'
+    +'<div class="qbox">'+q.qHTML+'</div>'
+    +'<div class="choices">'+q.choices.map(function(c,i){
+        return '<button class="ch'+(isWord?' word':'')+'" type="button" data-ans="'+i+'">'+c.t+'</button>';
+      }).join('')+'</div>';
+  $('#say').innerHTML=q.question;
+  $('#stage').innerHTML=h;
+}
+
+function reveal(){
+  renderSol(true,false);
+  $$('#stage .ch').forEach(function(b,i){
+    var ok=!!(G.q.choices[i]&&G.q.choices[i].correct);
+    b.classList.toggle('yes',ok);
+    if(!ok) b.classList.add('no');
+    b.disabled=true;
+  });
+  $('#hintBtn').hidden=true;
+  var nx=$('#next');nx.hidden=false;nx.textContent=(G.i+1>=G.total)?'결과 보기':'다음 문제';
+}
+
+function recordResult(firstTry){
+  var t=G.q.type;
+  G.round[t].n++; if(firstTry) G.round[t].ok++;
+  save.stats[t].n++; if(firstTry) save.stats[t].ok++;
+}
+function answer(ok,btn){
+  if(G.done) return;
+  if(ok){
+    G.done=true;
+    var firstTry=(G.wrong===0),gain=0;
+    if(firstTry){G.first++;G.streak++;gain=10+(G.streak>=3?5:0);G.results[G.i]='ok'}
+    else{G.streak=0;G.results[G.i]='miss'}
+    recordResult(firstTry);
+    G.earned+=gain;save.coins+=gain;persist();
+    setFace('happy');
+    fb(GOOD[rnd(0,GOOD.length-1)]+(gain?'  +'+gain+' 코인':''),'good');
+    tone(SND.good);
+    if(btn) btn.classList.add('yes');
+    $$('#stage .ch').forEach(function(b){
+      b.disabled=true;
+      if(btn&&b!==btn&&!b.classList.contains('yes')) b.classList.add('no');
+    });
+    renderSol(true,true);
+    $('#sol').classList.remove('pop');void $('#sol').offsetWidth;$('#sol').classList.add('pop');
+    $('#hintBtn').hidden=true;
+    var nx=$('#next');nx.hidden=false;nx.textContent=(G.i+1>=G.total)?'결과 보기':'다음 문제';
+    var cw=$('#coinPlay').parentNode;cw.classList.remove('bump');void cw.offsetWidth;cw.classList.add('bump');
+    paintCoins();renderPips();
+    G.log[G.i]={label:G.q.label,ok:firstTry,steps:G.q.steps,type:G.q.type};
+  }else{
+    G.wrong++;G.streak=0;G.results[G.i]='miss';
+    setFace('oops');
+    fb(OOPS[rnd(0,OOPS.length-1)],'bad');
+    tone(SND.bad);
+    if(btn){btn.classList.add('no');btn.disabled=true;btn.classList.remove('shake');void btn.offsetWidth;btn.classList.add('shake')}
+    if(G.wrong>=2){
+      G.done=true;
+      recordResult(false);
+      persist();
+      fb('같이 풀어 봐요. 아래 해설을 보세요.','bad');
+      reveal();
+      G.log[G.i]={label:G.q.label,ok:false,steps:G.q.steps,type:G.q.type};
+    }else renderSol(false,false);
+    renderPips();
+  }
+}
+
+$('#cards').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-course]');
+  if(!b||b.disabled) return;
+  startGame(b.getAttribute('data-course'));
+});
+$('#stage').addEventListener('click',function(e){
+  if(!G||G.done) return;
+  var ch=e.target.closest('.ch');
+  if(!ch||ch.disabled) return;
+  answer(!!G.q.choices[+ch.getAttribute('data-ans')].correct,ch);
+});
+$('#hintBtn').addEventListener('click',function(){
+  if(!G||G.done) return;
+  renderSol(false,false);
+  $('#sol').scrollIntoView({block:'nearest',behavior:'smooth'});
+});
+$('#next').addEventListener('click',function(){
+  if(G.i+1>=G.total){finish();return}
+  G.i++;nextQ();
+});
+
+function finish(){
+  var f=G.first,s=f>=7?3:(f>=5?2:1),bonus=0;
+  if(s===3){bonus=20;save.coins+=bonus;G.earned+=bonus}
+  save.stars[G.course]=Math.max(save.stars[G.course]||0,s);
+  var key=s===3?'gold':(s===2?'silver':'bronze');
+  save.trophies[key]=(save.trophies[key]||0)+1;
+  persist();
+  $('#rTitle').textContent=s===3?'소수 챔피언!':(s===2?'결승 진출!':'좋은 출발이에요!');
+  $('#rMsg').textContent=s===3?'다섯 유형을 고루 잘 풀었어요.'
+    :(s===2?'별 3개는 첫 번에 7문제를 맞히면 받아요.':'아래 성적표에서 약한 유형을 확인해 보세요.');
+  $('#rStars').innerHTML=starsHTML(s);
+  $('#rStars').setAttribute('aria-label','별 '+s+'개');
+  $('#prize').innerHTML=trophySVG(key)+'<div><b>'+TROPHY[key].n+'</b> 획득! <br><span style="color:var(--muted);font-size:15px">지금까지 '+save.trophies[key]+'개</span></div>';
+  $('#rFirst').textContent=f+' / '+G.total;
+  $('#rCoins').textContent='+'+G.earned+(bonus?' (챔피언 보너스 +20 포함)':'');
+  $('#rface').innerHTML=trophy('happy');
+  /* 유형별 성적표 */
+  var rows=TYPES.map(function(t){
+    var r=G.round[t];
+    var pct=r.n?Math.round(r.ok/r.n*100):0;
+    return '<div class="rrow'+(r.n?'':' zero')+'"><span class="nm">'+TNAME[t]+'</span>'
+      +'<span class="track"><span class="fillb" style="width:'+(r.n?pct:0)+'%;background:var(--'+
+        ({read:'t1',compare:'t2',add:'t3',sub:'t4',chain:'t5'}[t])+')"></span></span>'
+      +'<span class="sc">'+(r.n?(r.ok+'/'+r.n):'–')+'</span></div>';
+  }).join('');
+  var weakNow=TYPES.filter(function(t){return G.round[t].n>0&&G.round[t].ok<G.round[t].n});
+  weakNow.sort(function(x,y){return (G.round[x].ok/G.round[x].n)-(G.round[y].ok/G.round[y].n)});
+  var advice;
+  if(!weakNow.length) advice='<b>모든 유형을 첫 번에 다 맞혔어요.</b> 한 단계 위 코스에 도전해 보세요.';
+  else{
+    var gm=TGAME[weakNow[0]];
+    advice='이번에 <b>'+TNAME[weakNow[0]]+'</b>에서 가장 많이 막혔어요. '+gm+josaKo(gm,'을','를')+' 한 판 더 해 보면 좋아요.';
+  }
+  $('#report').innerHTML='<h2>유형별 성적표</h2>'+rows+'<p class="advice">'+advice+'</p>';
+  $('#weakBtn').hidden=(totalPlayed()<8);
+  $('#rList').innerHTML=G.log.map(function(e,i){
+    if(!e) return '';
+    return '<details class="rv"><summary><span class="rv-n">'+(i+1)+'</span>'
+      +'<span class="rv-t" style="background:var(--'+({read:'t1',compare:'t2',add:'t3',sub:'t4',chain:'t5'}[e.type])+')">'+TNAME[e.type]+'</span>'
+      +'<span class="rv-q">'+e.label+'</span>'
+      +'<span class="rv-m '+(e.ok?'ok':'miss')+'">'+(e.ok?'○':'✕')+'</span><span class="rv-open"></span></summary>'
+      +'<div class="rv-b">'+stepsHTML(e.steps)+'</div></details>';
+  }).join('');
+  tone(SND.win);
+  show('result');
+}
+
+$('#back').addEventListener('click',function(){G=null;renderHome();show('home')});
+$('#toHome').addEventListener('click',function(){G=null;renderHome();show('home')});
+$('#again').addEventListener('click',function(){startGame(G.course)});
+$('#weakBtn').addEventListener('click',function(){startGame('weak')});
+$$('.snd').forEach(function(b){b.addEventListener('click',function(){save.sound=!save.sound;persist();paintSound();if(save.sound)tone(SND.tap)})});
+
+renderHome();show('home');
+})();
+</script>
+</body>
+</html>
+<!--
+  분수 주스 공장
+  © 2026 슬픈달 (knight0706.tistory.com)
+  무단 복제 및 재배포를 금합니다.
+-->
