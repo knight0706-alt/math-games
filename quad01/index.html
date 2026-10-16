@@ -1,0 +1,1020 @@
+<!--
+  분수 주스 공장
+  © 2026 슬픈달 (knight0706.tistory.com)
+  무단 복제 및 재배포를 금합니다.
+-->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F0ECF1">
+<title>직각 탐정소</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=Noto+Sans+KR:wght@400;700&family=Roboto+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: 제도 작업실. 왼쪽에 삼각자 조수와 말풍선, 오른쪽에 도형판과 그 아래 해설. 좁은 화면에서는 위아래로 쌓음. */
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#F0ECF1; --panel:#FFFFFF; --panel2:#F8F4F8; --ink:#271C2B; --muted:#655A6C; --line:#D5C9D7;
+  --rasp:#B02C66; --rasp-deep:#7D1443; --rasp-ink:#FFFFFF;
+  --pine:#2A7557; --pine-deep:#16503A; --pine-ink:#FFFFFF;
+  --paper:#FBF8FB; --draw:#3B2F40; --ghost:#A694AC;
+  --good:#0E6B4C; --bad:#B33322; --star:#C58A18; --focus:#1550CE;
+  --m1:#B02C66; --m2:#2A7557; --m3:#C58A18;
+  --f-display:'Nanum Myeongjo','Apple SD Gothic Neo',serif;
+  --f-body:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;
+  --f-num:'Roboto Mono','SFMono-Regular',Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#191320; --panel:#231B2B; --panel2:#2C2335; --ink:#EFE6F1; --muted:#AC9EB2; --line:#3D3146;
+    --rasp:#F2719E; --rasp-deep:#A83464; --rasp-ink:#2A0714;
+    --pine:#54C99A; --pine-deep:#2A7557; --pine-ink:#05231A;
+    --paper:#1E1726; --draw:#E4D9E8; --ghost:#6B5A74;
+    --good:#4FD2A2; --bad:#FF8A72; --star:#F0C14B; --focus:#8FB8FF;
+    --m1:#F2719E; --m2:#54C99A; --m3:#F0C14B;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#191320; --panel:#231B2B; --panel2:#2C2335; --ink:#EFE6F1; --muted:#AC9EB2; --line:#3D3146;
+  --rasp:#F2719E; --rasp-deep:#A83464; --rasp-ink:#2A0714;
+  --pine:#54C99A; --pine-deep:#2A7557; --pine-ink:#05231A;
+  --paper:#1E1726; --draw:#E4D9E8; --ghost:#6B5A74;
+  --good:#4FD2A2; --bad:#FF8A72; --star:#F0C14B; --focus:#8FB8FF;
+  --m1:#F2719E; --m2:#54C99A; --m3:#F0C14B;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
+  word-break:keep-all;overflow-wrap:break-word;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+h1,h2,h3,p{margin:0}
+#app{height:100%;max-width:1140px;margin:0 auto;padding-inline:16px;padding-block:12px;display:flex;flex-direction:column}
+.screen{flex:1;min-height:0;display:flex;flex-direction:column}
+
+.btn{min-height:56px;padding:0 22px;border-radius:11px;border:0;background:var(--rasp);color:var(--rasp-ink);font-weight:700;font-size:18px;box-shadow:0 4px 0 var(--rasp-deep)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--rasp-deep)}
+.btn.go{background:var(--pine);color:var(--pine-ink);box-shadow:0 4px 0 var(--pine-deep)}
+.btn.go:active{box-shadow:0 1px 0 var(--pine-deep)}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.btn.ghost:active{transform:translateY(2px)}
+.btn.ghost.on{background:var(--panel2);border-color:var(--rasp);color:var(--rasp)}
+.btn.small{min-height:48px;font-size:16px;padding:0 14px}
+.coins{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:5px 14px 5px 7px;font-family:var(--f-num);font-weight:700;font-size:19px}
+.coin{width:26px;height:26px;border-radius:50%;background:var(--star);border:4px solid var(--rasp-deep);display:inline-block}
+.bump{animation:bump .4s}
+
+/* 홈 */
+#home{overflow-y:auto}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(29px,5.2vw,44px);line-height:1.25;text-wrap:balance}
+.tag{display:inline-block;font-size:14px;font-weight:700;color:var(--rasp);letter-spacing:.05em}
+.sub{color:var(--muted);margin-top:6px;max-width:38em;font-size:16px}
+.head-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.note{margin-top:14px;background:var(--panel);border:2px solid var(--line);border-left:6px solid var(--rasp);border-radius:12px;padding:12px 15px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.note svg{width:74px;height:74px;flex:none;display:block}
+.note .nt{min-width:0}
+.note b{font-family:var(--f-display);font-weight:800;font-size:17px}
+.note p{font-size:15px;color:var(--muted);margin-top:3px}
+.badges{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:15px;color:var(--muted)}
+.badge-i{display:inline-flex;align-items:center;gap:5px;font-family:var(--f-num);font-weight:700;font-size:17px;color:var(--ink)}
+.badge-i svg{width:28px;height:28px;display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:15px;margin-top:14px}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:13px;min-width:0}
+.ctop{display:flex;gap:13px;align-items:center}
+.ico{flex:none;width:74px;height:74px;display:grid;place-items:center;background:var(--paper);border:2px solid var(--line);border-radius:11px;overflow:hidden;padding:5px}
+.ico svg{display:block;max-height:62px;max-width:100%;width:auto;height:auto}
+.card h2{font-family:var(--f-display);font-weight:800;font-size:21px;line-height:1.3}
+.card p{color:var(--muted);font-size:14px}
+.lvs{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.lv{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;min-height:96px;padding:10px 11px;border:2px solid var(--line);border-radius:11px;background:var(--panel2)}
+.lv:active{transform:translateY(2px);border-color:var(--rasp)}
+.lv-n{font-weight:700;font-size:18px;line-height:1.1}
+.lv-d{font-size:13px;color:var(--muted);line-height:1.3}
+.stars{margin-top:auto;letter-spacing:2px;font-size:17px}
+.st{color:var(--line)}.st.on{color:var(--star)}
+.foot{color:var(--muted);font-size:14px;margin-block:18px 8px;max-width:52em}
+
+/* 플레이 */
+.bar{display:flex;align-items:center;gap:9px 12px;flex-wrap:wrap;padding-bottom:10px}
+.bar-t{flex:1;min-width:120px;font-family:var(--f-display);font-weight:800;font-size:20px;line-height:1.25}
+.bar-t small{display:block;font-family:var(--f-body);font-weight:400;font-size:13px;color:var(--muted)}
+.pips{display:flex;gap:6px}
+.pip{width:13px;height:13px;border-radius:50%;border:2px solid var(--line)}
+.pip.cur{border-color:var(--ink);transform:scale(1.25)}
+.pip.ok{background:var(--good);border-color:var(--good)}
+.pip.miss{background:var(--rasp);border-color:var(--rasp)}
+.qn{font-family:var(--f-num);color:var(--muted);font-size:14px}
+.work{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-content:start;padding-bottom:14px}
+@media (min-width:880px){.work{grid-template-columns:minmax(220px,27%) minmax(0,1fr)}}
+.left{display:flex;gap:12px;align-items:flex-start}
+@media (min-width:880px){.left{flex-direction:column}}
+#face{flex:none;width:80px}
+#face svg{display:block;width:100%;height:auto}
+@media (min-width:880px){#face{width:118px;align-self:center}}
+.bubble{position:relative;background:var(--panel);border:2px solid var(--line);border-radius:13px;padding:12px 14px;flex:1;min-width:0}
+.bubble::before{content:"";position:absolute;width:13px;height:13px;background:var(--panel);border-left:2px solid var(--line);border-bottom:2px solid var(--line);left:-8px;top:24px;transform:rotate(45deg)}
+@media (min-width:880px){.bubble{width:100%;flex:none}.bubble::before{left:50%;top:-8px;margin-left:-7px;transform:rotate(135deg)}}
+#say{font-weight:700;font-size:19px;line-height:1.45}
+#fb{margin-top:5px;min-height:1.5em;font-size:16px;font-weight:700}
+#fb.good{color:var(--good)}#fb.bad{color:var(--bad)}
+.right{display:flex;flex-direction:column;gap:12px;min-width:0}
+.board{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:13px;min-width:0}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.readout{font-family:var(--f-num);font-weight:700;font-size:clamp(20px,4.4vmin,28px);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.readout .deg{color:var(--rasp)}
+.readout.ok .deg{color:var(--good)}
+.readout small{font-family:var(--f-body);font-weight:400;font-size:14px;color:var(--muted)}
+.tip{font-size:15px;color:var(--muted);text-align:center}
+
+/* 도형판 */
+.geowrap{background:var(--paper);border:2px solid var(--line);border-radius:11px;padding:6px;display:flex;justify-content:center}
+.geo{display:block;width:100%;height:auto;max-width:340px}
+.geo .ln{stroke:var(--draw);stroke-width:3.5;stroke-linecap:round}
+.geo .ln.base{stroke:var(--rasp);stroke-width:4.5}
+.geo .ln.mov{stroke:var(--pine)}
+.geo .ln.ext{stroke:var(--ghost);stroke-width:2.5;stroke-dasharray:6 6}
+.geo .rmk{fill:none;stroke:var(--pine);stroke-width:3.5}
+.geo .rmk.on{stroke:var(--good)}
+.geo .arcl{fill:none;stroke:var(--star);stroke-width:3}
+.geo .atx{fill:var(--star);font-family:var(--f-num);font-weight:700;font-size:21px}
+.geo .lbl{fill:var(--draw);font-family:var(--f-body);font-weight:700;font-size:20px}
+.geo .lbl.b{fill:var(--rasp)}
+.geo .dot{fill:var(--draw)}
+.geo .hit{fill:none;stroke:transparent;stroke-width:30;cursor:pointer}
+.geo .side{stroke:var(--draw);stroke-width:4;stroke-linecap:round}
+.geo .side.base{stroke:var(--rasp);stroke-width:6}
+.geo .side.sel{stroke:var(--pine);stroke-width:7}
+.geo .vtx{fill:var(--panel);stroke:var(--draw);stroke-width:2.5}
+.geo .vlb{fill:var(--draw);font-family:var(--f-body);font-weight:700;font-size:19px}
+.optrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.opt{background:var(--panel2);border:3px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:5px;align-items:center}
+.opt:active{border-color:var(--rasp);transform:translateY(2px)}
+.opt.no{opacity:.42;border-style:dashed;border-color:var(--bad)}
+.opt.yes{border-color:var(--good);box-shadow:0 0 0 3px var(--good)}
+.opt svg{width:100%;height:auto;max-width:170px}
+.opt .onm{font-family:var(--f-display);font-weight:800;font-size:17px}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px}
+.ch{min-height:86px;background:var(--panel2);border:3px solid var(--line);border-radius:12px;font-weight:700;font-size:clamp(19px,4vmin,26px);display:flex;align-items:center;justify-content:center;padding:8px;line-height:1.2;text-align:center}
+.ch:active{border-color:var(--rasp);transform:translateY(2px)}
+.ch.no{opacity:.42;border-style:dashed;border-color:var(--bad)}
+.ch.yes{border-color:var(--good);box-shadow:0 0 0 3px var(--good)}
+.acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* 해설 */
+.sol{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.sol-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--f-display);font-weight:800;font-size:19px}
+.sol-h .pill{font-family:var(--f-body);font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.steps{display:flex;flex-direction:column;gap:13px;counter-reset:s}
+.step{display:grid;grid-template-columns:32px minmax(0,1fr);gap:11px;align-items:start}
+.step::before{counter-increment:s;content:counter(s);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--rasp);color:var(--rasp-ink);font-weight:700;font-size:17px}
+.step .sb{min-width:0}
+.step h3{font-weight:700;font-size:17px;margin-bottom:2px}
+.step p{font-size:16px;line-height:1.55}
+.step b{color:var(--rasp)}
+.step .num{font-family:var(--f-num);font-weight:700}
+.defbox{margin-top:8px;padding:10px 13px;border-radius:9px;background:var(--panel2);border:1px dashed var(--rasp);font-size:15px}
+.defbox b{color:var(--rasp)}
+.fig{margin-top:9px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.fig .geowrap{flex:1 1 200px;max-width:260px}
+
+/* 결과 */
+#result{overflow-y:auto}
+.res{max-width:640px;display:flex;flex-direction:column;gap:14px;padding-block:6px}
+.res-top{display:flex;align-items:center;gap:14px}
+#rface{width:104px;flex:none}
+#rface svg{display:block;width:100%;height:auto}
+.bigstars{font-size:clamp(42px,10vw,62px);letter-spacing:5px;line-height:1}
+.prize{display:flex;align-items:center;gap:12px;background:var(--panel);border:2px solid var(--star);border-radius:13px;padding:12px 14px}
+.prize svg{width:56px;height:56px;flex:none;display:block}
+.prize b{font-family:var(--f-display);font-weight:800;font-size:19px}
+.rstats{display:flex;flex-direction:column;gap:3px;font-size:17px}
+.rstats b{font-family:var(--f-num);font-weight:700;font-size:22px}
+.review{display:flex;flex-direction:column;gap:8px}
+.review h2{font-family:var(--f-display);font-weight:800;font-size:19px;margin-top:4px}
+details.rv{border:2px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+details.rv>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;padding:10px 13px;min-height:56px;font-weight:700;font-size:16px}
+details.rv>summary::-webkit-details-marker{display:none}
+.rv-n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.rv-q{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rv-m{flex:none;font-size:19px}
+.rv-m.ok{color:var(--good)}.rv-m.miss{color:var(--rasp)}
+.rv-open{flex:none;font-size:13px;font-weight:400;color:var(--muted)}
+details.rv[open] .rv-open::after{content:"닫기"}
+details.rv:not([open]) .rv-open::after{content:"해설"}
+.rv-b{padding:0 13px 13px;border-top:2px solid var(--line);margin-top:2px;padding-top:12px}
+
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes rise{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.shake{animation:shake .35s}
+.pop{animation:rise .4s}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+<style>
+/* 파일로 직접 열 때를 위한 기본값 (아티팩트에서는 플랫폼이 넣어 주는 부분) */
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px system-ui,-apple-system,sans-serif;background:#fafaf9}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <section id="home" class="screen">
+    <div class="head">
+      <div>
+        <span class="tag">사각형 1편</span>
+        <h1>직각 탐정소</h1>
+        <p class="sub">두 직선이 직각으로 만나는지 알아보고, 직접 돌려서 수선을 만들어 봐요. 4학년 도형과 측정, 수직과 수선 단원입니다.</p>
+      </div>
+      <div class="head-r">
+        <div class="coins" aria-label="코인"><span class="coin"></span><b id="coinHome">0</b></div>
+        <button class="btn ghost small snd" type="button">소리 켜짐</button>
+      </div>
+    </div>
+    <div class="note" id="note"></div>
+    <div class="badges" id="badges"></div>
+    <div class="cards" id="cards"></div>
+    <p class="foot">한 판은 문제 8개예요. <b>맞혀도 해설이 펼쳐집니다.</b> 눈대중으로는 85°와 90°를 구별하기 어려우니, <b>각도기</b> 단추를 눌러 재 보는 습관을 들이면 좋아요.</p>
+  </section>
+
+  <section id="play" class="screen" hidden>
+    <div class="bar">
+      <button class="btn ghost small" id="back" type="button">← 처음으로</button>
+      <div class="bar-t"><span id="mName"></span><small id="lName"></small></div>
+      <div class="pips" id="pips" role="img"></div>
+      <span class="qn" id="qn"></span>
+      <div class="coins" aria-label="코인"><span class="coin"></span><b id="coinPlay">0</b></div>
+      <button class="btn ghost small snd" type="button">소리 켜짐</button>
+    </div>
+    <div class="work">
+      <div class="left">
+        <div id="face"></div>
+        <div class="bubble">
+          <div id="say"></div>
+          <div id="fb" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="board" id="board"></div>
+        <div class="sol" id="sol" hidden></div>
+        <div class="acts">
+          <button class="btn go" id="check" type="button" hidden>확인!</button>
+          <button class="btn ghost" id="hintBtn" type="button">힌트 보기</button>
+          <button class="btn" id="next" type="button" hidden>다음 문제</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="result" class="screen" hidden>
+    <div class="res">
+      <div class="res-top">
+        <div id="rface"></div>
+        <div><h1 id="rTitle"></h1><p class="sub" id="rMsg"></p></div>
+      </div>
+      <div class="bigstars" id="rStars" role="img"></div>
+      <div class="prize" id="prize"></div>
+      <div class="rstats">
+        <span>첫 번에 맞힌 문제 <b id="rFirst"></b></span>
+        <span>이번에 번 코인 <b id="rCoins"></b></span>
+      </div>
+      <div class="review">
+        <h2>8문제 다시 보기</h2>
+        <div id="rList"></div>
+      </div>
+      <div class="acts">
+        <button class="btn go" id="again" type="button">한 번 더</button>
+        <button class="btn" id="nextLv" type="button" hidden>다음 단계</button>
+        <button class="btn ghost" id="toHome" type="button">처음으로</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+'use strict';
+// ==LOGIC-START==
+var rnd=function(a,b){return Math.floor(Math.random()*(b-a+1))+a};
+var pick=function(a){return a[Math.floor(Math.random()*a.length)]};
+var shuffle=function(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=rnd(0,i),t=a[i];a[i]=a[j];a[j]=t}return a};
+function rad(d){return d*Math.PI/180}
+function PX(cx,cy,r,deg){return [cx+r*Math.cos(rad(deg)), cy-r*Math.sin(rad(deg))]}
+function f1(n){return (Math.round(n*10)/10)}
+/* 두 직선이 이루는 각 (0~90). 90이면 수직 */
+function angBetween(a,b){var d=((a-b)%180+180)%180;return d>90?180-d:d}
+/* a1 에서 a2 까지 가장 짧은 회전량 (-90~90) */
+function signedDelta(a1,a2){var d=((a2-a1)%180+180)%180;return d>90?d-180:d}
+var HANGUL=['ㄱ','ㄴ','ㄷ','ㄹ'];
+var LINEN=['가','나','다','라'];
+function josaKo(s,w,o){
+  var c=s.charCodeAt(s.length-1);
+  if(c<0xAC00||c>0xD7A3) return o;
+  return ((c-0xAC00)%28!==0)?w:o;
+}
+
+/* ---- 도형 그리기 ---- */
+function arcPath(cx,cy,r,a1,delta,steps){
+  steps=steps||26;
+  var pts=[],i,a;
+  for(i=0;i<=steps;i++){
+    a=rad(a1+delta*i/steps);
+    pts.push((cx+r*Math.cos(a)).toFixed(1)+','+(cy-r*Math.sin(a)).toFixed(1));
+  }
+  return 'M'+pts.join(' L');
+}
+/* 직각 표시 (작은 정사각형 모서리) */
+function rightMark(cx,cy,a1,a2,s,on){
+  s=s||20;
+  var p1=PX(cx,cy,s,a1), p2=PX(cx,cy,s,a2);
+  var x3=p1[0]+p2[0]-cx, y3=p1[1]+p2[1]-cy;
+  return '<path class="rmk'+(on?' on':'')+'" d="M'+p1[0].toFixed(1)+' '+p1[1].toFixed(1)
+    +' L'+x3.toFixed(1)+' '+y3.toFixed(1)+' L'+p2[0].toFixed(1)+' '+p2[1].toFixed(1)+'"/>';
+}
+/* 두 직선 사이 각을 호와 숫자로 */
+function angleArc(cx,cy,a1,a2,r){
+  r=r||46;
+  var d=signedDelta(a1,a2), ang=Math.abs(d);
+  if(ang<0.5) return '';
+  var mid=a1+d/2, lp=PX(cx,cy,r+22,mid);
+  return '<path class="arcl" d="'+arcPath(cx,cy,r,a1,d)+'"/>'
+    +'<text class="atx" x="'+lp[0].toFixed(1)+'" y="'+(lp[1]+7).toFixed(1)+'" text-anchor="middle">'+f1(ang)+'°</text>';
+}
+/* 한 직선. seg 가 있으면 그 구간만 실선, 나머지는 연장선(점선) */
+function lineEl(cx,cy,deg,R,cls,seg,showExt){
+  var h='',a=PX(cx,cy,-R,deg), b=PX(cx,cy,R,deg);
+  if(seg){
+    var s1=PX(cx,cy,seg[0],deg), s2=PX(cx,cy,seg[1],deg);
+    if(showExt) h+='<line class="ln ext" x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'"/>';
+    h+='<line class="ln '+cls+'" x1="'+s1[0].toFixed(1)+'" y1="'+s1[1].toFixed(1)+'" x2="'+s2[0].toFixed(1)+'" y2="'+s2[1].toFixed(1)+'"/>';
+  }else{
+    h+='<line class="ln '+cls+'" x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'"/>';
+  }
+  return h;
+}
+function lineLabel(cx,cy,deg,r,txt,cls){
+  var p=PX(cx,cy,r,deg);
+  return '<text class="lbl'+(cls?' '+cls:'')+'" x="'+p[0].toFixed(1)+'" y="'+(p[1]+6).toFixed(1)+'" text-anchor="middle">'+txt+'</text>';
+}
+/* 두 직선 그림 */
+function twoLines(a1,a2,o){
+  o=o||{};
+  var S=o.size||300, C=S/2, R=C-34;
+  var h='<svg class="geo" viewBox="0 0 '+S+' '+S+'" role="img" aria-label="두 직선이 만나는 그림">';
+  h+=lineEl(C,C,a1,R,'base',o.seg1,o.ext);
+  h+=lineEl(C,C,a2,R,'mov',o.seg2,o.ext);
+  if(o.right) h+=rightMark(C,C,a1,a2,Math.round(S/15),o.rightOn);
+  if(o.arc) h+=angleArc(C,C,a1,a2,Math.round(S/6.5));
+  if(o.lab1) h+=lineLabel(C,C,a1,R+16,o.lab1,'b');
+  if(o.lab2) h+=lineLabel(C,C,a2,R+16,o.lab2);
+  h+='<circle class="dot" cx="'+C+'" cy="'+C+'" r="4"/>';
+  return h+'</svg>';
+}
+/* 기준선 하나 + 여러 직선. 각 직선은 기준선 위 t 지점을 지난다 */
+function manyLines(base,items,o){
+  o=o||{};
+  var S=o.size||320, C=S/2, R=C-30;
+  var h='<svg class="geo" viewBox="0 0 '+S+' '+S+'" role="img" aria-label="여러 직선 그림"'+(o.tap?' data-tap="1"':'')+'>';
+  h+=lineEl(C,C,base,R,'base');
+  h+=lineLabel(C,C,base,R+15,'가','b');
+  var i;
+  for(i=0;i<items.length;i++){
+    var it=items[i], p=PX(C,C,it.t,base);
+    var rr=R-Math.abs(it.t)*0.45;
+    h+=lineEl(p[0],p[1],it.deg,rr,'mov');
+    h+=lineLabel(p[0],p[1],it.deg,rr+15,it.name);
+    if(o.showRight&&angBetween(base,it.deg)===90) h+=rightMark(p[0],p[1],base,it.deg,17,true);
+    if(o.arcAll) h+=angleArc(p[0],p[1],base,it.deg,30);
+  }
+  if(o.tap){
+    for(i=0;i<items.length;i++){
+      var it2=items[i], p2=PX(C,C,it2.t,base), rr2=R-Math.abs(it2.t)*0.45;
+      var e1=PX(p2[0],p2[1],-rr2,it2.deg), e2=PX(p2[0],p2[1],rr2,it2.deg);
+      h+='<line class="hit" data-i="'+i+'" x1="'+e1[0].toFixed(1)+'" y1="'+e1[1].toFixed(1)
+        +'" x2="'+e2[0].toFixed(1)+'" y2="'+e2[1].toFixed(1)+'" role="button" tabindex="0" aria-label="직선 '+it2.name+'"/>';
+    }
+  }
+  return h+'</svg>';
+}
+
+/* ---- 사각형 ---- */
+var QUADS={
+  rect:{name:'직사각형',pts:[[0,0],[130,0],[130,80],[0,80]]},
+  square:{name:'정사각형',pts:[[0,0],[100,0],[100,100],[0,100]]},
+  rtrap:{name:'직각사다리꼴',pts:[[0,0],[135,0],[95,80],[0,80]]},
+  trap:{name:'사다리꼴',pts:[[25,0],[135,0],[105,80],[0,80]]},
+  para:{name:'평행사변형',pts:[[35,0],[145,0],[110,80],[0,80]]},
+  rhom:{name:'마름모',pts:[[55,0],[110,40],[55,80],[0,40]]}
+};
+/* 변 i 는 꼭짓점 i → i+1. 두 변의 방향벡터 내적이 0 이면 수직 (정수 좌표라 오차 없음) */
+function sideVec(pts,i){
+  var a=pts[i], b=pts[(i+1)%4];
+  return [b[0]-a[0], b[1]-a[1]];
+}
+function perpSides(pts,i){
+  var v=sideVec(pts,i), out=[],j,w;
+  for(j=0;j<4;j++){
+    if(j===i) continue;
+    w=sideVec(pts,j);
+    if(v[0]*w[0]+v[1]*w[1]===0) out.push(j);
+  }
+  return out;
+}
+function sideName(i){return '변 '+HANGUL[i]+HANGUL[(i+1)%4]}
+/* 회전·이동해서 화면 좌표로 */
+function placeQuad(pts,rotDeg,S,pad){
+  var i,cx=0,cy=0;
+  for(i=0;i<4;i++){cx+=pts[i][0];cy+=pts[i][1]}
+  cx/=4;cy/=4;
+  var r=rad(rotDeg),co=Math.cos(r),si=Math.sin(r),out=[];
+  for(i=0;i<4;i++){
+    var x=pts[i][0]-cx, y=pts[i][1]-cy;
+    out.push([x*co-y*si, x*si+y*co]);
+  }
+  var minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9;
+  for(i=0;i<4;i++){
+    if(out[i][0]<minx)minx=out[i][0]; if(out[i][0]>maxx)maxx=out[i][0];
+    if(out[i][1]<miny)miny=out[i][1]; if(out[i][1]>maxy)maxy=out[i][1];
+  }
+  var w=maxx-minx,hgt=maxy-miny;
+  var sc=Math.min((S-pad*2)/w,(S-pad*2)/hgt);
+  var ox=(S-w*sc)/2-minx*sc, oy=(S-hgt*sc)/2-miny*sc;
+  for(i=0;i<4;i++) out[i]=[out[i][0]*sc+ox, out[i][1]*sc+oy];
+  return out;
+}
+function quadFig(key,rotDeg,o){
+  o=o||{};
+  var S=o.size||320, pad=o.pad||46;
+  var P=placeQuad(QUADS[key].pts,rotDeg,S,pad);
+  var cx=0,cy=0,i;
+  for(i=0;i<4;i++){cx+=P[i][0];cy+=P[i][1]}
+  cx/=4;cy/=4;
+  var h='<svg class="geo" viewBox="0 0 '+S+' '+S+'" role="img" aria-label="'+QUADS[key].name+'"'+(o.tap?' data-tap="1"':'')+'>';
+  for(i=0;i<4;i++){
+    var a=P[i], b=P[(i+1)%4];
+    var cls='side'+(i===o.base?' base':'')+((o.sel&&o.sel.indexOf(i)>=0)?' sel':'');
+    h+='<line class="'+cls+'" x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)+'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'"/>';
+  }
+  if(o.marks){
+    for(i=0;i<o.marks.length;i++){
+      var m=o.marks[i], pa=P[m[0]], pb=P[m[1]], pc=P[m[2]];
+      var d1=Math.atan2(-(pa[1]-pb[1]),pa[0]-pb[0])*180/Math.PI;
+      var d2=Math.atan2(-(pc[1]-pb[1]),pc[0]-pb[0])*180/Math.PI;
+      h+=rightMark(pb[0],pb[1],d1,d2,16,true);
+    }
+  }
+  for(i=0;i<4;i++){
+    h+='<circle class="vtx" cx="'+P[i][0].toFixed(1)+'" cy="'+P[i][1].toFixed(1)+'" r="5"/>';
+    var dx=P[i][0]-cx, dy=P[i][1]-cy, L=Math.sqrt(dx*dx+dy*dy)||1;
+    var lx=P[i][0]+dx/L*21, ly=P[i][1]+dy/L*21;
+    h+='<text class="vlb" x="'+lx.toFixed(1)+'" y="'+(ly+6).toFixed(1)+'" text-anchor="middle">'+HANGUL[i]+'</text>';
+  }
+  if(o.tap){
+    for(i=0;i<4;i++){
+      if(i===o.base) continue;
+      var a2=P[i], b2=P[(i+1)%4];
+      h+='<line class="hit" data-i="'+i+'" x1="'+a2[0].toFixed(1)+'" y1="'+a2[1].toFixed(1)
+        +'" x2="'+b2[0].toFixed(1)+'" y2="'+b2[1].toFixed(1)+'" role="button" tabindex="0" aria-label="'+sideName(i)+'"/>';
+    }
+  }
+  return h+'</svg>';
+}
+
+/* ---- 공통 해설 조각 ---- */
+var DEF_PERP='<div class="defbox">두 직선이 만나서 이루는 각이 <b>직각(90°)</b>일 때, 두 직선은 서로 <b>수직</b>이라고 합니다.</div>';
+var DEF_FOOT='<div class="defbox">두 직선이 수직으로 만날 때, 한 직선을 다른 직선에 대한 <b>수선</b>이라고 합니다. 서로 상대의 수선이 돼요.</div>';
+
+/* ---- 문제 만들기 ---- */
+/* 1. 직각 탐지기 — 세 그림 중 수직인 것 고르기 */
+function genDetect(lv){
+  var base=rnd(0,17)*10, offs=[], i, q;
+  var wrongOff=function(){
+    if(lv===1) return pick([25,30,35,40,45,50,55,60])*pick([1,-1]);
+    return pick([5,8,10,12,15])*pick([1,-1]);
+  };
+  /* 90°와 130°는 화면에 똑같이 '50°'로 보인다. 보이는 각으로 중복을 걸러야 한다 */
+  var used=[90];
+  for(i=0;i<2;i++){
+    var w,aa,g=0;
+    do{ w=90+wrongOff(); aa=angBetween(0,w); g++; }while(g<40&&used.indexOf(aa)>=0);
+    used.push(aa);offs.push(w);
+  }
+  var opts=shuffle([{off:90,correct:true}].concat(offs.map(function(w){return {off:w,correct:false}})));
+  for(i=0;i<opts.length;i++){
+    opts[i].a1=base+rnd(0,5)*6;
+    opts[i].a2=opts[i].a1+opts[i].off;
+    opts[i].name=['가','나','다'][i];
+  }
+  q={type:'detect',lv:lv,opts:opts,seg:(lv===3),key:'dt'+opts.map(function(o){return o.off}).join('_')+base};
+  q.question='두 직선이 <b>서로 수직</b>인 것은 어느 것일까요?';
+  q.label='수직인 그림 찾기';
+  var ci=0;
+  for(i=0;i<opts.length;i++) if(opts[i].correct) ci=i;
+  var co=opts[ci];
+  q.steps=[
+    {t:'수직이 무엇인지부터',b:'<p>두 직선이 <b>직각</b>으로 만나야 수직이에요. 조금이라도 기울면 수직이 아닙니다.</p>'+DEF_PERP},
+    {t:'눈대중은 위험해요',b:'<p>'+(lv===1?'한눈에 보이는 차이도 있지만,':'85°와 90°는 눈으로 거의 구별이 안 돼요.')
+      +' 그래서 <b>각도기</b>로 재 보는 게 확실합니다. 문제를 풀 때 각도기 단추를 눌러 보세요.</p>'
+      +(q.seg?'<p style="margin-top:6px">선분이 짧아서 만나지 않아 보여도, <b>길게 늘여서</b> 만나는 각을 봐야 해요.</p>':'')},
+    {t:'재 보면',b:'<p>'+opts.map(function(o){
+        return '<b>'+o.name+'</b> : '+angBetween(o.a1,o.a2)+'°'+(o.correct?' ← 직각!':'');
+      }).join('<br>')+'</p><p style="margin-top:6px">그래서 <b>'+co.name+'</b>의 두 직선이 서로 수직이에요.</p>',
+     fig:'<div class="fig"><div class="geowrap">'
+        +twoLines(co.a1,co.a2,{size:260,arc:true,right:true,rightOn:true,ext:q.seg})+'</div></div>',reveal:true}
+  ];
+  return q;
+}
+
+/* 2. 수선 돌리기 — 직선을 돌려 직각 만들기 */
+function genTurn(lv){
+  var step,base,start,q;
+  if(lv===1){ step=15; base=pick([0,90]); }
+  else if(lv===2){ step=15; base=pick([15,30,45,60,75,105,120,135,150,165]); }
+  else { step=5; base=pick([5,10,20,25,35,40,50,55,65,70,80,85,100,110,115,125,130,140,145,155,160,170]); }
+  var target=(base+90)%180;
+  var g=0;
+  do{ start=(base+step*rnd(1,Math.floor(180/step)-1))%180; g++; }
+  while(g<40&&(angBetween(base,start)===90||angBetween(base,start)<20));
+  q={type:'turn',lv:lv,step:step,base:base,start:start,target:target,key:'tn'+base+'_'+start+'_'+step};
+  q.question='돌림 단추로 <b>초록 직선</b>을 돌려서 빨간 직선에 <b>수직</b>이 되게 만들어 주세요.';
+  q.label='수선 만들기 ('+step+'° 단위)';
+  q.steps=[
+    {t:'목표는 직각',b:'<p>두 직선이 이루는 각이 <b>90°</b>가 되면 수직이에요. 화면의 각도 숫자가 <b>90°</b>가 될 때까지 돌리면 됩니다.</p>'+DEF_PERP},
+    {t:'한 번에 '+step+'°씩',b:'<p>단추를 한 번 누를 때마다 '+step+'°씩 돌아가요. 지금 각도에서 90°까지 몇 번 눌러야 하는지 세어 보세요.</p>'
+      +'<p style="margin-top:6px">처음 각도는 <span class="num">'+angBetween(base,start)+'°</span>였어요.</p>'},
+    {t:'맞추면 직각 표시가 생겨요',b:'<p>수직이 되면 만나는 곳에 작은 <b>직각 표시(⌐)</b>가 나타나요. 이 표시는 "여기가 직각이다"라는 약속된 기호예요.</p>',
+     fig:'<div class="fig"><div class="geowrap">'
+        +twoLines(base,target,{size:260,right:true,rightOn:true,arc:true})+'</div></div>',reveal:true},
+    {t:'수선이라고 불러요',b:'<p>이렇게 수직으로 만나면 초록 직선은 빨간 직선에 대한 <b>수선</b>이에요. 반대로 빨간 직선도 초록 직선의 수선이고요.</p>'+DEF_FOOT,reveal:true}
+  ];
+  return q;
+}
+
+/* 3. 수선 고르기 — 기준선에 대한 수선 찾기 */
+function genPick(lv){
+  var base=rnd(0,17)*10, items=[], used=[], i, q;
+  var mkWrong=function(){
+    if(lv===1) return (base+90+pick([30,40,50,60,120,130,140])) % 180;
+    if(lv===2) return (Math.random()<.5)?base:((base+90+pick([25,35,45,135,145])) % 180);
+    return (base+90+pick([8,10,12,-8,-10,-12])+180) % 180;
+  };
+  var perpAng=(base+90)%180;
+  used.push(perpAng);
+  var angs=[perpAng];
+  for(i=0;i<2;i++){
+    var w,g=0;
+    do{ w=mkWrong(); g++; }while(g<40&&(used.indexOf(w)>=0||angBetween(base,w)===90));
+    used.push(w);angs.push(w);
+  }
+  var order=shuffle([0,1,2]), ts=[-72,0,72];
+  for(i=0;i<3;i++) items.push({deg:angs[order[i]],name:LINEN[i+1],t:ts[i],correct:order[i]===0});
+  q={type:'pick',lv:lv,base:base,items:items,key:'pk'+base+'_'+angs.join('_')};
+  q.question='직선 <b>가</b>에 대한 <b>수선</b>은 어느 것일까요?';
+  q.label='직선 가의 수선 찾기';
+  var ci=0;
+  for(i=0;i<items.length;i++) if(items[i].correct) ci=i;
+  var cn=items[ci].name;
+  q.steps=[
+    {t:'수선이 무엇인지',b:'<p>직선 가와 <b>직각으로 만나는</b> 직선을 찾으면 돼요. 그 직선을 직선 가에 대한 수선이라고 불러요.</p>'+DEF_FOOT},
+    {t:'나란한 선은 수선이 아니에요',b:'<p>직선 가와 <b>나란히 가는</b> 직선은 아무리 가도 만나지 않으니 수직일 수 없어요. '
+      +'<b>기울어져 만나는</b> 선 중에서 각이 꼭 90°인 것을 찾아야 해요.</p>'},
+    {t:'각을 재 보면',b:'<p>'+items.map(function(it){
+        return '직선 <b>'+it.name+'</b> : '+angBetween(base,it.deg)+'°'+(it.correct?' ← 직각!':'');
+      }).join('<br>')+'</p><p style="margin-top:6px">그래서 직선 <b>'+cn+'</b>'+josaKo(cn,'이','가')
+      +' 직선 가에 대한 수선이에요.</p>',
+     fig:'<div class="fig"><div class="geowrap">'+manyLines(base,items,{size:300,showRight:true,arcAll:true})+'</div></div>',reveal:true}
+  ];
+  return q;
+}
+
+/* 4. 사각형 속 수직 — 기준 변에 수직인 변을 모두 고르기 */
+function genQuad(lv){
+  var keys,key,rot,base,q;
+  if(lv===1){ keys=['rect','square']; rot=pick([0,0,90]); }
+  else if(lv===2){ keys=['rtrap','trap','rect']; rot=pick([0,0,90,180]); }
+  else { keys=['para','rhom','rect','rtrap']; rot=pick([15,25,35,-20,-30,55]); }
+  key=pick(keys);
+  base=rnd(0,3);
+  var pts=QUADS[key].pts;
+  var ans=perpSides(pts,base);
+  /* shape 는 도형 종류, key 는 중복 출제를 막는 식별자 — 서로 다른 값이어야 한다 */
+  q={type:'quad',lv:lv,shape:key,rot:rot,base:base,ans:ans,key:'qd'+key+base+rot};
+  q.question='<b>'+sideName(base)+'</b>에 수직인 변을 <b>모두</b> 눌러 주세요. 없으면 그냥 확인을 누르세요.';
+  q.label=QUADS[key].name+' · '+sideName(base)+'의 수선';
+  var marks=[];
+  for(var i=0;i<ans.length;i++){
+    var j=ans[i], shared=-1;
+    if((base+1)%4===j) shared=(base+1)%4;
+    else if((j+1)%4===base) shared=base;
+    if(shared>=0){
+      var prev=(shared+3)%4;
+      marks.push([prev,shared,(shared+1)%4]);
+    }
+  }
+  q.marks=marks;
+  q.steps=[
+    /* 변 이름은 ㄱ·ㄴ·ㄷ·ㄹ 로 끝나고 그 이름(기역·니은·디귿·리을)은 모두 받침으로 끝나므로 늘 '이에요' */
+    {t:'기준 변을 먼저 봐요',b:'<p>빨간 변이 <b>'+sideName(base)+'</b>이에요. 이 변과 <b>직각으로 만나는</b> 변을 찾습니다.</p>'+DEF_PERP,
+     fig:'<div class="fig"><div class="geowrap">'+quadFig(key,rot,{size:260,base:base})+'</div></div>'},
+    {t:'이웃한 변부터 확인',b:'<p>마주 보는 변은 나란해서 만나지 않아요. 그러니 <b>이웃한 두 변</b>을 살펴보면 됩니다. '
+      +'이웃해도 비스듬히 만나면 수직이 아니에요.</p>'},
+    {t:ans.length?('수직인 변은 '+ans.length+'개'):'수직인 변이 없어요',
+     b:'<p>'+(ans.length
+        ? (ans.map(function(j){return '<b>'+sideName(j)+'</b>'}).join(', ')+'이 '+sideName(base)+'과 직각으로 만나요.')
+        : ('이 도형에는 '+sideName(base)+'과 직각으로 만나는 변이 없어요. '+QUADS[key].name+'에서는 변들이 비스듬히 만나거든요.'))
+      +'</p>',
+     fig:'<div class="fig"><div class="geowrap">'+quadFig(key,rot,{size:260,base:base,sel:ans,marks:marks})+'</div></div>',reveal:true}
+  ];
+  return q;
+}
+// ==LOGIC-END==
+
+/* ---- 저장 ---- */
+var KEY='quad-perp-v1';
+var save={coins:0,stars:{},seals:{gold:0,silver:0,bronze:0},sound:true};
+try{
+  var raw=localStorage.getItem(KEY);
+  if(raw){var so=JSON.parse(raw);if(so&&typeof so==='object'){
+    save.coins=+so.coins||0;save.stars=so.stars||{};save.sound=so.sound!==false;
+    if(so.seals)['gold','silver','bronze'].forEach(function(k){save.seals[k]=+so.seals[k]||0});
+  }}
+}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}}
+
+var $=function(s){return document.querySelector(s)};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+
+/* ---- 삼각자 조수 ---- */
+function ruler(mood){
+  var c='var(--rasp)', ink='#2A1020';
+  var h='<svg viewBox="0 0 130 120" role="img" aria-label="삼각자">';
+  h+='<ellipse cx="65" cy="112" rx="42" ry="5" fill="'+ink+'" opacity=".12"/>';
+  h+='<path d="M16 102 L16 22 L104 102 Z" fill="'+c+'" opacity=".92"/>';
+  h+='<path d="M28 94 L28 48 L74 94 Z" fill="var(--paper)" opacity=".85"/>';
+  h+='<path d="M16 38 L32 38 L32 22" fill="none" stroke="var(--paper)" stroke-width="4"/>';
+  var eye=function(x,y){
+    if(mood==='happy') return '<path d="M'+(x-5)+' '+(y+2)+' Q'+x+' '+(y-6)+' '+(x+5)+' '+(y+2)+'" fill="none" stroke="'+ink+'" stroke-width="3" stroke-linecap="round"/>';
+    if(mood==='oops') return '<path d="M'+(x-4)+' '+(y-3)+' L'+(x+4)+' '+(y+3)+'M'+(x-4)+' '+(y+3)+' L'+(x+4)+' '+(y-3)+'" stroke="'+ink+'" stroke-width="2.6" stroke-linecap="round"/>';
+    return '<circle cx="'+x+'" cy="'+y+'" r="3.6" fill="'+ink+'"/>';
+  };
+  h+=eye(34,78)+eye(50,86);
+  if(mood==='happy') h+='<path d="M34 92 Q44 102 54 96 Z" fill="#6B1A2E"/>';
+  else if(mood==='oops') h+='<path d="M34 96 Q43 90 52 98" fill="none" stroke="'+ink+'" stroke-width="2.6" stroke-linecap="round"/>';
+  else h+='<path d="M34 92 Q43 99 52 94" fill="none" stroke="'+ink+'" stroke-width="2.6" stroke-linecap="round"/>';
+  return h+'</svg>';
+}
+var SEAL={gold:{n:'금 도장',c:'var(--star)'},silver:{n:'은 도장',c:'#9AA7B4'},bronze:{n:'동 도장',c:'#B07A45'}};
+function sealSVG(kind){
+  var c=SEAL[kind].c;
+  return '<svg viewBox="0 0 120 120" role="img" aria-label="'+SEAL[kind].n+'">'
+    +'<rect x="14" y="14" width="92" height="92" rx="12" fill="none" stroke="'+c+'" stroke-width="7"/>'
+    +'<path d="M40 82 L40 40 L82 40" fill="none" stroke="'+c+'" stroke-width="8" stroke-linecap="round"/>'
+    +'<path d="M40 58 L58 58 L58 40" fill="none" stroke="'+c+'" stroke-width="5"/></svg>';
+}
+
+/* ---- 소리 ---- */
+var AC=null;
+function tone(seq){
+  if(!save.sound) return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended') AC.resume();
+    var t0=AC.currentTime;
+    seq.forEach(function(s){
+      var o=AC.createOscillator(),g=AC.createGain();
+      o.type='triangle';o.frequency.value=s[0];
+      g.gain.setValueAtTime(0.0001,t0+s[1]);
+      g.gain.exponentialRampToValueAtTime(0.14,t0+s[1]+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+s[1]+s[2]);
+      o.connect(g);g.connect(AC.destination);
+      o.start(t0+s[1]);o.stop(t0+s[1]+s[2]+0.05);
+    });
+  }catch(e){}
+}
+var SND={good:[[698,0,.13],[1047,.11,.25]],bad:[[185,0,.27]],tap:[[500,0,.05]],tick:[[840,0,.04]],
+  snap:[[880,0,.07],[1320,.06,.12]],win:[[587,0,.13],[784,.11,.13],[988,.22,.13],[1319,.33,.33]]};
+function paintSound(){$$('.snd').forEach(function(b){b.textContent=save.sound?'소리 켜짐':'소리 꺼짐'})}
+
+/* ---- 모드 ---- */
+var MODES={
+  detect:{name:'직각 탐지기',desc:'두 직선이 수직인 그림을 찾아요',lv:['한눈에 보이는 차이','85°와 90° 가려내기','늘여야 만나는 선분'],
+    ico:twoLines(0,90,{size:110,right:true,rightOn:true})},
+  turn:{name:'수선 돌리기',desc:'직선을 돌려서 직각으로 맞춰요',lv:['15°씩, 가로 기준선','15°씩, 기울어진 기준선','5°씩 미세 조정'],
+    ico:twoLines(20,75,{size:110,arc:true})},
+  pick:{name:'수선 고르기',desc:'기준 직선에 대한 수선을 찾아요',lv:['확연히 다른 각','나란한 선도 섞여요','10° 차이 가려내기'],
+    ico:manyLines(0,[{deg:90,name:'나',t:-40},{deg:40,name:'다',t:50}],{size:110})},
+  quad:{name:'사각형 속 수직',desc:'도형에서 수직인 변을 모두 찾아요',lv:['직사각형·정사각형','사다리꼴','평행사변형·기울어진 도형'],
+    ico:quadFig('rect',0,{size:110,base:0,pad:22})}
+};
+var ORDER=['detect','turn','pick','quad'];
+var GENS={detect:genDetect,turn:genTurn,pick:genPick,quad:genQuad};
+var GOOD=['정확해요!','직각 발견!','정답이에요!','우와, 탐정 솜씨네요!','딱 90°예요!','빈틈이 없네요!'];
+var OOPS=['앗, 다시 볼까요?','조금만 더 생각해 봐요.','괜찮아요, 해설을 같이 봐요.','거의 다 왔어요!'];
+
+/* ---- 화면 ---- */
+var starsHTML=function(s){return [1,2,3].map(function(i){return '<span class="st'+(i<=s?' on':'')+'">★</span>'}).join('')};
+function show(id){
+  ['home','play','result'].forEach(function(s){$('#'+s).hidden=(s!==id)});
+  $('#'+id).scrollTop=0;
+}
+function paintCoins(){$('#coinHome').textContent=save.coins;$('#coinPlay').textContent=save.coins}
+function renderNote(){
+  $('#note').innerHTML=ruler('idle')
+    +'<div class="nt"><b>수직과 수선</b>'
+    +'<p>두 직선이 만나 이루는 각이 직각이면 두 직선은 서로 <b>수직</b>, 그때 한 직선을 다른 직선에 대한 <b>수선</b>이라고 해요.</p></div>';
+  var tot=save.seals.gold+save.seals.silver+save.seals.bronze;
+  $('#badges').innerHTML=tot
+    ? '<span>모은 도장</span>'+['gold','silver','bronze'].map(function(k){
+        return '<span class="badge-i" title="'+SEAL[k].n+'">'+sealSVG(k)+'<span>'+save.seals[k]+'</span></span>';
+      }).join('')
+    : '<span>한 판을 끝내면 직각 도장을 찍어 드려요.</span>';
+}
+function renderHome(){
+  paintCoins();paintSound();renderNote();
+  $('#cards').innerHTML=ORDER.map(function(m){
+    var M=MODES[m];
+    var lvs=[1,2,3].map(function(l){
+      var s=save.stars[m+l]||0;
+      return '<button class="lv" type="button" data-mode="'+m+'" data-lv="'+l+'"><span class="lv-n">'+l+'단계</span>'
+        +'<span class="lv-d">'+M.lv[l-1]+'</span><span class="stars" role="img" aria-label="별 '+s+'개">'+starsHTML(s)+'</span></button>';
+    }).join('');
+    return '<article class="card"><div class="ctop"><div class="ico">'+M.ico+'</div><div><h2>'+M.name+'</h2><p>'+M.desc+'</p></div></div>'
+      +'<div class="lvs">'+lvs+'</div></article>';
+  }).join('');
+}
+
+/* ---- 게임 ---- */
+var G=null;
+function startGame(mode,lv){
+  G={mode:mode,lv:lv,i:0,total:8,first:0,streak:0,earned:0,results:[],used:{},log:[],q:null,wrong:0,done:false,
+     cur:0,sel:[],proto:false};
+  $('#mName').textContent=MODES[mode].name;
+  $('#lName').textContent=lv+'단계 · '+MODES[mode].lv[lv-1];
+  show('play');
+  nextQ();
+}
+function setFace(mood){$('#face').innerHTML=ruler(mood)}
+function fb(t,c){var e=$('#fb');e.innerHTML=t||'';e.className=c||''}
+function renderPips(){
+  $('#pips').innerHTML=Array.from({length:G.total},function(_,i){
+    return '<i class="pip '+(G.results[i]||'')+(i===G.i?' cur':'')+'"></i>';
+  }).join('');
+  $('#pips').setAttribute('aria-label',(G.i+1)+' / '+G.total+'번째 문제');
+  $('#qn').textContent=(G.i+1)+' / '+G.total;
+}
+function stepsHTML(steps){
+  return '<div class="steps">'+steps.map(function(s){
+    return '<div class="step"><div class="sb"><h3>'+s.t+'</h3>'+s.b+(s.fig||'')+'</div></div>';
+  }).join('')+'</div>';
+}
+function renderSol(full,won){
+  var steps=G.q.steps.filter(function(s){return full||!s.reveal});
+  if(!steps.length){$('#sol').hidden=true;return}
+  $('#sol').hidden=false;
+  var head=full?(won?'정답! 왜 그런지 같이 볼까요':'해설'):'힌트';
+  var pill=full?(won?'맞혀도 해설은 꼭 보기':'끝까지 같이 풀어 봐요'):'여기까지만 알려줄게요';
+  $('#sol').innerHTML='<div class="sol-h"><span>'+head+'</span><span class="pill">'+pill+'</span></div>'+stepsHTML(steps);
+}
+function hideSol(){$('#sol').hidden=true;$('#sol').innerHTML=''}
+
+function nextQ(){
+  G.done=false;G.wrong=0;G.sel=[];G.proto=false;
+  var q,tries=0;
+  do{q=GENS[G.mode](G.lv);tries++}while(G.used[q.key]&&tries<60);
+  G.used[q.key]=1;G.q=q;
+  if(q.type==='turn') G.cur=q.start;
+  setFace('idle');fb('');hideSol();
+  $('#next').hidden=true;$('#hintBtn').hidden=false;
+  var needCheck=(q.type==='turn')||(q.type==='quad');
+  $('#check').hidden=!needCheck;
+  $('#check').textContent=(q.type==='turn')?'이게 수직이에요!':'다 골랐어요!';
+  renderQ();renderPips();paintCoins();
+}
+function turnBody(){
+  var q=G.q, ang=angBetween(q.base,G.cur), ok=(ang===90);
+  return '<div class="geowrap">'+twoLines(q.base,G.cur,{size:320,right:ok,rightOn:ok,arc:true})+'</div>'
+    +'<div class="readout'+(ok?' ok':'')+'"><span>두 직선이 이루는 각</span><span class="deg">'+ang+'°</span>'
+    +(ok?'<small>직각이에요!</small>':'<small>90°를 만들어요</small>')+'</div>'
+    +'<div class="tools"><button class="btn ghost" id="trl" type="button" aria-label="왼쪽으로 돌리기">◀ '+q.step+'°</button>'
+    +'<button class="btn ghost" id="trr" type="button" aria-label="오른쪽으로 돌리기">'+q.step+'° ▶</button></div>';
+}
+function quadBody(){
+  var q=G.q;
+  return '<div class="geowrap">'+quadFig(q.shape,q.rot,{size:320,base:q.base,sel:G.sel,tap:true})+'</div>'
+    +'<div class="tip">'+(G.sel.length?('고른 변: '+G.sel.map(sideName).join(', ')):'변을 누르면 선택돼요. 다시 누르면 취소됩니다.')+'</div>';
+}
+function renderQ(){
+  var q=G.q,h='';
+  if(q.type==='detect'){
+    h='<div class="optrow">'+q.opts.map(function(o,i){
+        return '<button class="opt" type="button" data-ans="'+i+'">'
+          +twoLines(o.a1,o.a2,{size:200,arc:G.proto,seg1:q.seg?[-78,20]:null,seg2:q.seg?[-20,78]:null})
+          +'<span class="onm">'+o.name+'</span></button>';
+      }).join('')+'</div>'
+      +'<div class="tools"><button class="btn ghost'+(G.proto?' on':'')+'" id="proto" type="button">각도기 '+(G.proto?'치우기':'대 보기')+'</button></div>';
+  }else if(q.type==='turn'){
+    h=turnBody();
+  }else if(q.type==='pick'){
+    h='<div class="geowrap">'+manyLines(q.base,q.items,{size:320,tap:true,arcAll:G.proto})+'</div>'
+      +'<div class="tools"><button class="btn ghost'+(G.proto?' on':'')+'" id="proto" type="button">각도기 '+(G.proto?'치우기':'대 보기')+'</button></div>'
+      +'<div class="tip">직선을 눌러서 고르세요.</div>';
+  }else{
+    h=quadBody();
+  }
+  $('#say').innerHTML=q.question;
+  $('#board').innerHTML=h;
+}
+
+function reveal(){
+  renderSol(true,false);
+  var q=G.q;
+  if(q.type==='turn'){
+    G.cur=q.target;
+    $('#board').innerHTML=turnBody();
+    if($('#trl')){$('#trl').disabled=true;$('#trr').disabled=true}
+  }else if(q.type==='quad'){
+    G.sel=q.ans.slice();
+    $('#board').innerHTML='<div class="geowrap">'+quadFig(q.shape,q.rot,{size:320,base:q.base,sel:q.ans,marks:q.marks})+'</div>'
+      +'<div class="tip">'+(q.ans.length?('정답: '+q.ans.map(sideName).join(', ')):'수직인 변이 없는 도형이었어요.')+'</div>';
+  }else if(q.type==='detect'){
+    $$('#board .opt').forEach(function(b,i){
+      var ok=!!q.opts[i].correct;
+      b.classList.toggle('yes',ok);
+      if(!ok) b.classList.add('no');
+      b.disabled=true;
+    });
+  }else{
+    G.proto=true;
+    $('#board').innerHTML='<div class="geowrap">'+manyLines(q.base,q.items,{size:320,arcAll:true,showRight:true})+'</div>'
+      +'<div class="tip">정답: 직선 '+q.items.filter(function(it){return it.correct})[0].name+'</div>';
+  }
+  $('#check').hidden=true;$('#hintBtn').hidden=true;
+  var nx=$('#next');nx.hidden=false;nx.textContent=(G.i+1>=G.total)?'결과 보기':'다음 문제';
+}
+
+function answer(ok,btn){
+  if(G.done) return;
+  if(ok){
+    G.done=true;
+    var firstTry=(G.wrong===0),gain=0;
+    if(firstTry){G.first++;G.streak++;gain=10+(G.streak>=3?5:0);G.results[G.i]='ok'}
+    else{G.streak=0;G.results[G.i]='miss'}
+    G.earned+=gain;save.coins+=gain;persist();
+    setFace('happy');
+    fb(GOOD[rnd(0,GOOD.length-1)]+(gain?'  +'+gain+' 코인':''),'good');
+    tone(SND.good);
+    if(btn) btn.classList.add('yes');
+    $$('#board .opt,#board .ch').forEach(function(b){
+      b.disabled=true;
+      if(btn&&b!==btn&&!b.classList.contains('yes')) b.classList.add('no');
+    });
+    if($('#trl')){$('#trl').disabled=true;$('#trr').disabled=true}
+    if(G.q.type==='quad'){
+      /* 맞혔을 때도 직각 표시를 찍어 보여 준다 */
+      $('#board').innerHTML='<div class="geowrap">'+quadFig(G.q.shape,G.q.rot,{size:320,base:G.q.base,sel:G.q.ans,marks:G.q.marks})+'</div>'
+        +'<div class="tip">'+(G.q.ans.length?('수직인 변: '+G.q.ans.map(sideName).join(', ')):'이 도형에는 수직인 변이 없어요.')+'</div>';
+    }
+    renderSol(true,true);
+    $('#sol').classList.remove('pop');void $('#sol').offsetWidth;$('#sol').classList.add('pop');
+    $('#check').hidden=true;$('#hintBtn').hidden=true;
+    var nx=$('#next');nx.hidden=false;nx.textContent=(G.i+1>=G.total)?'결과 보기':'다음 문제';
+    var cw=$('#coinPlay').parentNode;cw.classList.remove('bump');void cw.offsetWidth;cw.classList.add('bump');
+    paintCoins();renderPips();
+    G.log[G.i]={label:G.q.label,ok:firstTry,steps:G.q.steps};
+  }else{
+    G.wrong++;G.streak=0;G.results[G.i]='miss';
+    setFace('oops');
+    fb(OOPS[rnd(0,OOPS.length-1)],'bad');
+    tone(SND.bad);
+    if(btn){btn.classList.add('no');btn.disabled=true;btn.classList.remove('shake');void btn.offsetWidth;btn.classList.add('shake')}
+    if(G.wrong>=2){
+      G.done=true;
+      fb('같이 풀어 봐요. 아래 해설을 보세요.','bad');
+      reveal();
+      G.log[G.i]={label:G.q.label,ok:false,steps:G.q.steps};
+    }else renderSol(false,false);
+    renderPips();
+  }
+}
+
+/* 조작 */
+function turnBy(d){
+  var q=G.q;
+  G.cur=((G.cur+d*q.step)%180+180)%180;
+  $('#board').innerHTML=turnBody();
+  tone(angBetween(q.base,G.cur)===90?SND.snap:SND.tick);
+}
+function toggleSide(i){
+  var at=G.sel.indexOf(i);
+  if(at>=0) G.sel.splice(at,1); else G.sel.push(i);
+  G.sel.sort(function(a,b){return a-b});
+  $('#board').innerHTML=quadBody();
+  tone(SND.tap);
+}
+function sameSet(a,b){
+  if(a.length!==b.length) return false;
+  var x=a.slice().sort(),y=b.slice().sort(),i;
+  for(i=0;i<x.length;i++) if(x[i]!==y[i]) return false;
+  return true;
+}
+
+$('#cards').addEventListener('click',function(e){
+  var b=e.target.closest('.lv');if(!b) return;
+  startGame(b.getAttribute('data-mode'),+b.getAttribute('data-lv'));
+});
+$('#board').addEventListener('click',function(e){
+  if(!G) return;
+  if(e.target.closest('#proto')){
+    G.proto=!G.proto;renderQ();tone(SND.tap);return;
+  }
+  if(G.done) return;
+  if(e.target.closest('#trl')){turnBy(-1);return}
+  if(e.target.closest('#trr')){turnBy(1);return}
+  var hit=e.target.closest('.hit');
+  if(hit){
+    var idx=+hit.getAttribute('data-i');
+    if(G.q.type==='quad'){toggleSide(idx);return}
+    if(G.q.type==='pick'){answer(!!G.q.items[idx].correct,null);return}
+  }
+  var opt=e.target.closest('.opt');
+  if(opt&&!opt.disabled&&G.q.type==='detect'){
+    answer(!!G.q.opts[+opt.getAttribute('data-ans')].correct,opt);
+  }
+});
+$('#board').addEventListener('keydown',function(e){
+  if(!G||G.done) return;
+  if(e.key!=='Enter'&&e.key!==' ') return;
+  var hit=e.target.closest('.hit');
+  if(!hit) return;
+  e.preventDefault();
+  var idx=+hit.getAttribute('data-i');
+  if(G.q.type==='quad') toggleSide(idx);
+  else if(G.q.type==='pick') answer(!!G.q.items[idx].correct,null);
+});
+$('#check').addEventListener('click',function(){
+  if(!G||G.done) return;
+  var q=G.q;
+  if(q.type==='turn') answer(angBetween(q.base,G.cur)===90,null);
+  else if(q.type==='quad') answer(sameSet(G.sel,q.ans),null);
+});
+$('#hintBtn').addEventListener('click',function(){
+  if(!G||G.done) return;
+  renderSol(false,false);
+  $('#sol').scrollIntoView({block:'nearest',behavior:'smooth'});
+});
+$('#next').addEventListener('click',function(){
+  if(G.i+1>=G.total){finish();return}
+  G.i++;nextQ();
+});
+
+function finish(){
+  var f=G.first,s=f>=7?3:(f>=5?2:1),bonus=0;
+  if(s===3){bonus=20;save.coins+=bonus;G.earned+=bonus}
+  var k=G.mode+G.lv;
+  save.stars[k]=Math.max(save.stars[k]||0,s);
+  var key=s===3?'gold':(s===2?'silver':'bronze');
+  save.seals[key]=(save.seals[key]||0)+1;
+  persist();
+  $('#rTitle').textContent=s===3?'직각 탐정 1급!':(s===2?'솜씨가 늘었어요!':'좋은 출발이에요!');
+  $('#rMsg').textContent=s===3?'거의 다 첫 번에 맞혔어요. 다음 단계도 할 수 있어요.'
+    :(s===2?'별 3개는 첫 번에 7문제를 맞히면 받아요.':'틀린 문제는 아래에서 해설을 다시 보면 쉬워져요.');
+  $('#rStars').innerHTML=starsHTML(s);
+  $('#rStars').setAttribute('aria-label','별 '+s+'개');
+  $('#prize').innerHTML=sealSVG(key)+'<div><b>'+SEAL[key].n+'</b> 획득! <br><span style="color:var(--muted);font-size:15px">지금까지 '+save.seals[key]+'개</span></div>';
+  $('#rFirst').textContent=f+' / '+G.total;
+  $('#rCoins').textContent='+'+G.earned+(bonus?' (탐정 보너스 +20 포함)':'');
+  $('#rface').innerHTML=ruler('happy');
+  $('#nextLv').hidden=!(s>=2&&G.lv<3);
+  $('#rList').innerHTML=G.log.map(function(e,i){
+    if(!e) return '';
+    return '<details class="rv"><summary><span class="rv-n">'+(i+1)+'</span><span class="rv-q">'+e.label+'</span>'
+      +'<span class="rv-m '+(e.ok?'ok':'miss')+'">'+(e.ok?'○':'✕')+'</span><span class="rv-open"></span></summary>'
+      +'<div class="rv-b">'+stepsHTML(e.steps)+'</div></details>';
+  }).join('');
+  tone(SND.win);
+  show('result');
+}
+
+$('#back').addEventListener('click',function(){G=null;renderHome();show('home')});
+$('#toHome').addEventListener('click',function(){G=null;renderHome();show('home')});
+$('#again').addEventListener('click',function(){startGame(G.mode,G.lv)});
+$('#nextLv').addEventListener('click',function(){startGame(G.mode,G.lv+1)});
+$$('.snd').forEach(function(b){b.addEventListener('click',function(){save.sound=!save.sound;persist();paintSound();if(save.sound)tone(SND.tap)})});
+
+renderHome();show('home');
+})();
+</script>
+</body>
+</html>
+<!--
+  분수 주스 공장
+  © 2026 슬픈달 (knight0706.tistory.com)
+  무단 복제 및 재배포를 금합니다.
+-->
