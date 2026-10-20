@@ -1,0 +1,1190 @@
+<!--
+  © 2026 슬픈달 (knight0706.tistory.com)
+  무단 복제 및 재배포를 금합니다.
+-->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#3B4AA0">
+<title>모양 탐정소</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=Noto+Sans+KR:wght@400;700&family=Roboto+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: 제도 작업실(직각·평행 탐정소와 같은 구조, 쪽빛·놋쇠 색). 왼쪽 조수와 말풍선, 오른쪽 도형판과 해설. */
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#EAECF3; --panel:#FFFFFF; --panel2:#F3F4FA; --ink:#1C2140; --muted:#565C7C; --line:#C8CCE0;
+  --indigo:#3B4AA0; --indigo-deep:#232E70; --indigo-ink:#FFFFFF;
+  --brass:#A3620B; --brass-deep:#74430A; --brass-ink:#FFFBF0;
+  --paper:#FAFAFE; --draw:#2A2F4D; --ghost:#99A0BE;
+  --good:#1A6B4E; --bad:#B33322; --star:#BE7D12; --focus:#1550CE;
+  --f-display:'Nanum Myeongjo','Apple SD Gothic Neo',serif;
+  --f-body:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;
+  --f-num:'Roboto Mono','SFMono-Regular',Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#131629; --panel:#1C2038; --panel2:#242944; --ink:#E7E9F6; --muted:#A1A7C6; --line:#343A5C;
+    --indigo:#9AA6F2; --indigo-deep:#4F5CB8; --indigo-ink:#0C1030;
+    --brass:#F0B64B; --brass-deep:#A9731C; --brass-ink:#2A1A02;
+    --paper:#171B31; --draw:#DDE1F4; --ghost:#5C6389;
+    --good:#4FD2A2; --bad:#FF8A72; --star:#F0C14B; --focus:#8FB8FF;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131629; --panel:#1C2038; --panel2:#242944; --ink:#E7E9F6; --muted:#A1A7C6; --line:#343A5C;
+  --indigo:#9AA6F2; --indigo-deep:#4F5CB8; --indigo-ink:#0C1030;
+  --brass:#F0B64B; --brass-deep:#A9731C; --brass-ink:#2A1A02;
+  --paper:#171B31; --draw:#DDE1F4; --ghost:#5C6389;
+  --good:#4FD2A2; --bad:#FF8A72; --star:#F0C14B; --focus:#8FB8FF;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
+  word-break:keep-all;overflow-wrap:break-word;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+h1,h2,h3,p{margin:0}
+#app{height:100%;max-width:1140px;margin:0 auto;padding-inline:16px;padding-block:12px;display:flex;flex-direction:column}
+.screen{flex:1;min-height:0;display:flex;flex-direction:column}
+
+.btn{min-height:56px;padding:0 22px;border-radius:11px;border:0;background:var(--indigo);color:var(--indigo-ink);font-weight:700;font-size:18px;box-shadow:0 4px 0 var(--indigo-deep)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--indigo-deep)}
+.btn.go{background:var(--brass);color:var(--brass-ink);box-shadow:0 4px 0 var(--brass-deep)}
+.btn.go:active{box-shadow:0 1px 0 var(--brass-deep)}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.btn.ghost:active{transform:translateY(2px)}
+.btn.ghost.on{background:var(--panel2);border-color:var(--brass);color:var(--brass)}
+.btn.small{min-height:48px;font-size:16px;padding:0 14px}
+.coins{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:5px 14px 5px 7px;font-family:var(--f-num);font-weight:700;font-size:19px}
+.coin{width:26px;height:26px;border-radius:50%;background:var(--star);border:4px solid var(--indigo-deep);display:inline-block}
+.bump{animation:bump .4s}
+
+/* 홈 */
+#home{overflow-y:auto}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(29px,5.2vw,44px);line-height:1.25;text-wrap:balance}
+.tag{display:inline-block;font-size:14px;font-weight:700;color:var(--brass);letter-spacing:.05em}
+.sub{color:var(--muted);margin-top:6px;max-width:38em;font-size:16px}
+.head-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.note{margin-top:14px;background:var(--panel);border:2px solid var(--line);border-left:6px solid var(--indigo);border-radius:12px;padding:12px 15px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.note svg{width:76px;height:76px;flex:none;display:block}
+.note .nt{min-width:0}
+.note b{font-family:var(--f-display);font-weight:800;font-size:17px}
+.note p{font-size:15px;color:var(--muted);margin-top:3px}
+.badges{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:15px;color:var(--muted)}
+.badge-i{display:inline-flex;align-items:center;gap:5px;font-family:var(--f-num);font-weight:700;font-size:17px;color:var(--ink)}
+.badge-i svg{width:28px;height:28px;display:block}
+.grouptitle{font-family:var(--f-display);font-weight:800;font-size:19px;margin-top:20px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.grouptitle span{font-family:var(--f-body);font-weight:400;font-size:14px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:15px;margin-top:10px}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:13px;min-width:0}
+.ctop{display:flex;gap:13px;align-items:center}
+.ico{flex:none;width:74px;height:74px;display:grid;place-items:center;background:var(--paper);border:2px solid var(--line);border-radius:11px;overflow:hidden;padding:5px}
+.ico svg{display:block;max-height:62px;max-width:100%;width:auto;height:auto}
+.card h2{font-family:var(--f-display);font-weight:800;font-size:21px;line-height:1.3}
+.card p{color:var(--muted);font-size:14px}
+.lvs{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.lv{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;min-height:96px;padding:10px 11px;border:2px solid var(--line);border-radius:11px;background:var(--panel2)}
+.lv:active{transform:translateY(2px);border-color:var(--brass)}
+.lv-n{font-weight:700;font-size:18px;line-height:1.1}
+.lv-d{font-size:13px;color:var(--muted);line-height:1.3}
+.stars{margin-top:auto;letter-spacing:2px;font-size:17px}
+.st{color:var(--line)}.st.on{color:var(--star)}
+.foot{color:var(--muted);font-size:14px;margin-block:18px 8px;max-width:52em}
+
+/* 플레이 */
+.bar{display:flex;align-items:center;gap:9px 12px;flex-wrap:wrap;padding-bottom:10px}
+.bar-t{flex:1;min-width:120px;font-family:var(--f-display);font-weight:800;font-size:20px;line-height:1.25}
+.bar-t small{display:block;font-family:var(--f-body);font-weight:400;font-size:13px;color:var(--muted)}
+.pips{display:flex;gap:6px}
+.pip{width:13px;height:13px;border-radius:50%;border:2px solid var(--line)}
+.pip.cur{border-color:var(--ink);transform:scale(1.25)}
+.pip.ok{background:var(--good);border-color:var(--good)}
+.pip.miss{background:var(--brass);border-color:var(--brass)}
+.qn{font-family:var(--f-num);color:var(--muted);font-size:14px}
+.work{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-content:start;padding-bottom:14px}
+@media (min-width:880px){.work{grid-template-columns:minmax(220px,27%) minmax(0,1fr)}}
+.left{display:flex;gap:12px;align-items:flex-start}
+@media (min-width:880px){.left{flex-direction:column}}
+#face{flex:none;width:80px}
+#face svg{display:block;width:100%;height:auto}
+@media (min-width:880px){#face{width:118px;align-self:center}}
+.bubble{position:relative;background:var(--panel);border:2px solid var(--line);border-radius:13px;padding:12px 14px;flex:1;min-width:0}
+.bubble::before{content:"";position:absolute;width:13px;height:13px;background:var(--panel);border-left:2px solid var(--line);border-bottom:2px solid var(--line);left:-8px;top:24px;transform:rotate(45deg)}
+@media (min-width:880px){.bubble{width:100%;flex:none}.bubble::before{left:50%;top:-8px;margin-left:-7px;transform:rotate(135deg)}}
+#say{font-weight:700;font-size:19px;line-height:1.45}
+#fb{margin-top:5px;min-height:1.5em;font-size:16px;font-weight:700}
+#fb.good{color:var(--good)}#fb.bad{color:var(--bad)}
+.right{display:flex;flex-direction:column;gap:12px;min-width:0}
+.board{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:13px;min-width:0}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.readout{font-family:var(--f-num);font-weight:700;font-size:clamp(19px,4.2vmin,26px);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.readout .val{color:var(--brass)}
+.readout small{font-family:var(--f-body);font-weight:400;font-size:14px;color:var(--muted)}
+.tip{font-size:15px;color:var(--muted);text-align:center}
+
+/* 도형판 */
+.geowrap{background:var(--paper);border:2px solid var(--line);border-radius:11px;padding:6px;display:flex;justify-content:center}
+.geo{display:block;width:100%;height:auto;max-width:400px}
+.geo .fillq{fill:var(--indigo);opacity:.07}
+.geo .side{stroke:var(--draw);stroke-width:4;stroke-linecap:round;fill:none}
+.geo .side.base{stroke:var(--brass);stroke-width:6}
+.geo .side.sel{stroke:var(--indigo);stroke-width:7}
+.geo .chev{fill:none;stroke:var(--indigo);stroke-width:3;stroke-linecap:round}
+.geo .chev.b{stroke:var(--brass)}
+.geo .eqt{stroke:var(--brass);stroke-width:3;stroke-linecap:round}
+.geo .dg{stroke:var(--indigo);stroke-width:3;stroke-dasharray:7 5;stroke-linecap:round}
+.geo .dg.solid{stroke-dasharray:none;stroke-width:3.5}
+.geo .ctr{fill:var(--brass)}
+.geo .rmk{fill:none;stroke:var(--brass);stroke-width:3}
+.geo .arc{fill:none;stroke:var(--brass);stroke-width:3}
+.geo .avl{fill:var(--brass);font-family:var(--f-num);font-weight:700;font-size:18px}
+.geo .slb{fill:var(--indigo);font-family:var(--f-num);font-weight:700;font-size:18px}
+.geo .qmk{fill:var(--bad);font-family:var(--f-num);font-weight:700;font-size:22px}
+.geo .vtx{fill:var(--panel);stroke:var(--draw);stroke-width:2.5}
+.geo .vlb{fill:var(--draw);font-family:var(--f-body);font-weight:700;font-size:19px}
+.geo .vlb.b{fill:var(--brass)}
+.geo .hit{fill:none;stroke:transparent;stroke-width:34;cursor:pointer}
+.optrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+.opt{background:var(--panel2);border:3px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:5px;align-items:center}
+.opt:active{border-color:var(--brass);transform:translateY(2px)}
+.opt.sel{border-color:var(--indigo);background:var(--panel)}
+.opt.no{opacity:.42;border-style:dashed;border-color:var(--bad)}
+.opt.yes{border-color:var(--good);box-shadow:0 0 0 3px var(--good)}
+.opt svg{width:100%;height:auto;max-width:170px}
+.opt .onm{font-family:var(--f-display);font-weight:800;font-size:17px}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px}
+.ch{min-height:84px;background:var(--panel2);border:3px solid var(--line);border-radius:12px;font-weight:700;font-size:clamp(18px,3.8vmin,25px);display:flex;align-items:center;justify-content:center;padding:8px;line-height:1.2;text-align:center}
+.ch:active{border-color:var(--brass);transform:translateY(2px)}
+.ch.no{opacity:.42;border-style:dashed;border-color:var(--bad)}
+.ch.yes{border-color:var(--good);box-shadow:0 0 0 3px var(--good)}
+.acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+/* 해설 */
+.sol{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.sol-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--f-display);font-weight:800;font-size:19px}
+.sol-h .pill{font-family:var(--f-body);font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.steps{display:flex;flex-direction:column;gap:13px;counter-reset:s}
+.step{display:grid;grid-template-columns:32px minmax(0,1fr);gap:11px;align-items:start}
+.step::before{counter-increment:s;content:counter(s);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--indigo);color:var(--indigo-ink);font-weight:700;font-size:17px}
+.step .sb{min-width:0}
+.step h3{font-weight:700;font-size:17px;margin-bottom:2px}
+.step p{font-size:16px;line-height:1.55}
+.step b{color:var(--brass)}
+.step .num{font-family:var(--f-num);font-weight:700}
+.defbox{margin-top:8px;padding:10px 13px;border-radius:9px;background:var(--panel2);border:1px dashed var(--indigo);font-size:15px}
+.defbox b{color:var(--indigo)}
+.fig{margin-top:9px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.fig .geowrap{flex:1 1 200px;max-width:265px}
+
+/* 결과 */
+#result{overflow-y:auto}
+.res{max-width:640px;display:flex;flex-direction:column;gap:14px;padding-block:6px}
+.res-top{display:flex;align-items:center;gap:14px}
+#rface{width:104px;flex:none}
+#rface svg{display:block;width:100%;height:auto}
+.bigstars{font-size:clamp(42px,10vw,62px);letter-spacing:5px;line-height:1}
+.prize{display:flex;align-items:center;gap:12px;background:var(--panel);border:2px solid var(--star);border-radius:13px;padding:12px 14px}
+.prize svg{width:56px;height:56px;flex:none;display:block}
+.prize b{font-family:var(--f-display);font-weight:800;font-size:19px}
+.rstats{display:flex;flex-direction:column;gap:3px;font-size:17px}
+.rstats b{font-family:var(--f-num);font-weight:700;font-size:22px}
+.review{display:flex;flex-direction:column;gap:8px}
+.review h2{font-family:var(--f-display);font-weight:800;font-size:19px;margin-top:4px}
+details.rv{border:2px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+details.rv>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;padding:10px 13px;min-height:56px;font-weight:700;font-size:16px}
+details.rv>summary::-webkit-details-marker{display:none}
+.rv-n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.rv-q{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rv-m{flex:none;font-size:19px}
+.rv-m.ok{color:var(--good)}.rv-m.miss{color:var(--brass)}
+.rv-open{flex:none;font-size:13px;font-weight:400;color:var(--muted)}
+details.rv[open] .rv-open::after{content:"닫기"}
+details.rv:not([open]) .rv-open::after{content:"해설"}
+.rv-b{padding:0 13px 13px;border-top:2px solid var(--line);margin-top:2px;padding-top:12px}
+
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes rise{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.shake{animation:shake .35s}
+.pop{animation:rise .4s}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+<style>
+/* 파일로 직접 열 때를 위한 기본값 (아티팩트에서는 플랫폼이 넣어 주는 부분) */
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px system-ui,-apple-system,sans-serif;background:#fafaf9}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <section id="home" class="screen">
+    <div class="head">
+      <div>
+        <span class="tag">사각형 3편</span>
+        <h1>모양 탐정소</h1>
+        <p class="sub">마주 보는 변이 모두 나란한 평행사변형, 네 변이 모두 똑같은 마름모를 가려내고 숨은 길이와 각을 찾아내요. 4학년 도형과 측정, 평행사변형과 마름모 단원입니다.</p>
+      </div>
+      <div class="head-r">
+        <div class="coins" aria-label="코인"><span class="coin"></span><b id="coinHome">0</b></div>
+        <button class="btn ghost small snd" type="button">소리 켜짐</button>
+      </div>
+    </div>
+    <div class="note" id="note"></div>
+    <div class="badges" id="badges"></div>
+    <div id="groups"></div>
+    <p class="foot">한 판은 문제 8개예요. <b>맞혀도 해설이 펼쳐집니다.</b> 직사각형·정사각형도 평행사변형이고, 정사각형은 마름모이기도 해요. 이 <b>포함 관계</b>가 이 단원에서 가장 많이 틀리는 곳이니 해설을 꼭 읽어 보세요.</p>
+  </section>
+
+  <section id="play" class="screen" hidden>
+    <div class="bar">
+      <button class="btn ghost small" id="back" type="button">← 처음으로</button>
+      <div class="bar-t"><span id="mName"></span><small id="lName"></small></div>
+      <div class="pips" id="pips" role="img"></div>
+      <span class="qn" id="qn"></span>
+      <div class="coins" aria-label="코인"><span class="coin"></span><b id="coinPlay">0</b></div>
+      <button class="btn ghost small snd" type="button">소리 켜짐</button>
+    </div>
+    <div class="work">
+      <div class="left">
+        <div id="face"></div>
+        <div class="bubble">
+          <div id="say"></div>
+          <div id="fb" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="board" id="board"></div>
+        <div class="sol" id="sol" hidden></div>
+        <div class="acts">
+          <button class="btn go" id="check" type="button" hidden>확인!</button>
+          <button class="btn ghost" id="hintBtn" type="button">힌트 보기</button>
+          <button class="btn" id="next" type="button" hidden>다음 문제</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="result" class="screen" hidden>
+    <div class="res">
+      <div class="res-top">
+        <div id="rface"></div>
+        <div><h1 id="rTitle"></h1><p class="sub" id="rMsg"></p></div>
+      </div>
+      <div class="bigstars" id="rStars" role="img"></div>
+      <div class="prize" id="prize"></div>
+      <div class="rstats">
+        <span>첫 번에 맞힌 문제 <b id="rFirst"></b></span>
+        <span>이번에 번 코인 <b id="rCoins"></b></span>
+      </div>
+      <div class="review">
+        <h2>8문제 다시 보기</h2>
+        <div id="rList"></div>
+      </div>
+      <div class="acts">
+        <button class="btn go" id="again" type="button">한 번 더</button>
+        <button class="btn" id="nextLv" type="button" hidden>다음 단계</button>
+        <button class="btn ghost" id="toHome" type="button">처음으로</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+'use strict';
+// ==LOGIC-START==
+var rnd=function(a,b){return Math.floor(Math.random()*(b-a+1))+a};
+var pick=function(a){return a[Math.floor(Math.random()*a.length)]};
+var shuffle=function(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=rnd(0,i),t=a[i];a[i]=a[j];a[j]=t}return a};
+function rad(d){return d*Math.PI/180}
+var HANGUL=['ㄱ','ㄴ','ㄷ','ㄹ'];
+var CEN='ㅁ';
+function josaKo(s,w,o){
+  var c=s.charCodeAt(s.length-1);
+  if(c<0xAC00||c>0xD7A3) return o;
+  return ((c-0xAC00)%28!==0)?w:o;
+}
+/* 틀린 답 후보를 만들되 반드시 끝나도록. 후보가 모자라면 답+1, 답+2 … 로 채운다 */
+function distract(ans,cands,need){
+  var seen=[ans],out=[],i;
+  for(i=0;i<cands.length&&out.length<need;i++){
+    var v=cands[i];
+    if(v>0&&seen.indexOf(v)<0){seen.push(v);out.push(v)}
+  }
+  var k=1;
+  while(out.length<need&&k<200){
+    if(ans+k>0&&seen.indexOf(ans+k)<0){seen.push(ans+k);out.push(ans+k)}
+    k++;
+  }
+  return out;
+}
+
+/* ---- 벡터 ---- */
+function sideVec(pts,i){var a=pts[i],b=pts[(i+1)%4];return [b[0]-a[0],b[1]-a[1]]}
+function sideLen(pts,i){var v=sideVec(pts,i);return Math.sqrt(v[0]*v[0]+v[1]*v[1])}
+function uv(a,b){var dx=b[0]-a[0],dy=b[1]-a[1],L=Math.sqrt(dx*dx+dy*dy)||1;return [dx/L,dy/L]}
+function mid(a,b){return [(a[0]+b[0])/2,(a[1]+b[1])/2]}
+/* 두 변이 평행한가. 정수 좌표면 외적이 정확히 0, 계산해 만든 도형은 상대 오차로 본다 */
+function isParaSide(pts,i,j){
+  var v=sideVec(pts,i), w=sideVec(pts,j);
+  var c=v[0]*w[1]-v[1]*w[0];
+  var s=Math.sqrt((v[0]*v[0]+v[1]*v[1])*(w[0]*w[0]+w[1]*w[1]));
+  return Math.abs(c)<=s*1e-9;
+}
+function paraPairs(pts){
+  var out=[];
+  if(isParaSide(pts,0,2)) out.push([0,2]);
+  if(isParaSide(pts,1,3)) out.push([1,3]);
+  return out;
+}
+function paraOf(pts,i){var j=(i+2)%4;return isParaSide(pts,i,j)?j:-1}
+/* 변의 길이를 같은 것끼리 묶는다. rank 는 짧은 것부터 1, 2 … (눈금 개수) */
+function eqClasses(pts){
+  var L=[0,1,2,3].map(function(i){return sideLen(pts,i)});
+  var uniq=[],cls=[],i,j;
+  for(i=0;i<4;i++){
+    var f=-1;
+    for(j=0;j<uniq.length;j++) if(Math.abs(L[i]-uniq[j])<=1e-7*Math.max(L[i],uniq[j])){f=j;break}
+    if(f<0){uniq.push(L[i]);f=uniq.length-1}
+    cls.push(f);
+  }
+  var ord=uniq.map(function(_,k){return k}).sort(function(a,b){return uniq[a]-uniq[b]});
+  var rank=[];
+  for(i=0;i<ord.length;i++) rank[ord[i]]=i+1;
+  return {cls:cls,rank:rank,n:uniq.length,lens:L};
+}
+function isParallelogram(pts){return paraPairs(pts).length===2}
+function isRhombus(pts){return eqClasses(pts).n===1}
+function isRectangle(pts){
+  var i;
+  for(i=0;i<4;i++){
+    var v=sideVec(pts,i), w=sideVec(pts,(i+1)%4);
+    if(Math.abs(v[0]*w[0]+v[1]*w[1])>1e-7*sideLen(pts,i)*sideLen(pts,(i+1)%4)) return false;
+  }
+  return true;
+}
+function isSquare(pts){return isRectangle(pts)&&isRhombus(pts)}
+function sideName(i){return '변 '+HANGUL[i]+HANGUL[(i+1)%4]}
+function angName(i){return '각 '+HANGUL[i]}
+function diagName(i){return '대각선 '+HANGUL[i]+HANGUL[(i+2)%4]}
+function halfName(i){return '선분 '+HANGUL[i]+CEN}
+
+/* ---- 도형 목록 (정수 좌표라 평행·길이 판정이 정확하다) ---- */
+var QUADS={
+  para:{name:'평행사변형',pts:[[35,0],[145,0],[110,80],[0,80]]},
+  para2:{name:'평행사변형',pts:[[0,0],[110,0],[150,70],[40,70]]},
+  rect:{name:'직사각형',pts:[[0,0],[130,0],[130,80],[0,80]]},
+  square:{name:'정사각형',pts:[[0,0],[100,0],[100,100],[0,100]]},
+  rhom:{name:'마름모',pts:[[55,0],[110,40],[55,80],[0,40]]},
+  rhom2:{name:'마름모',pts:[[0,30],[40,0],[80,30],[40,60]]},
+  trap:{name:'사다리꼴',pts:[[25,0],[135,0],[105,80],[0,80]]},
+  rtrap:{name:'직각사다리꼴',pts:[[0,0],[135,0],[95,80],[0,80]]},
+  trap2:{name:'사다리꼴',pts:[[0,0],[120,0],[90,70],[30,70]]},
+  kite:{name:'사각형',pts:[[60,0],[120,52],[60,120],[0,52]]},
+  gen1:{name:'사각형',pts:[[0,12],[120,0],[142,78],[22,96]]},
+  gen2:{name:'사각형',pts:[[10,0],[130,22],[112,96],[0,66]]}
+};
+function Q(k){return (typeof k==='string')?QUADS[k]:k}
+/* 두 변 a, b 와 끼인각 th 로 평행사변형 만들기 (마주 보는 변이 똑같은 식에서 나오므로 평행이 보장된다) */
+function mkPara(a,b,th){
+  var U=22, c=Math.cos(rad(th)), s=Math.sin(rad(th));
+  return {name:'평행사변형',a:a,b:b,th:th,
+    pts:[[0,0],[a*U,0],[a*U+b*U*c,-b*U*s],[b*U*c,-b*U*s]]};
+}
+/* 대각선의 반이 m, n 인 마름모. 네 변의 길이는 모두 같다 */
+function mkRhomb(m,n){
+  var U=20;
+  return {name:'마름모',m:m,n:n,
+    pts:[[0,-n*U],[m*U,0],[0,n*U],[-m*U,0]]};
+}
+
+/* ---- 그리기 ---- */
+function placeQuad(pts,rotDeg,S,pad){
+  var i,cx=0,cy=0;
+  for(i=0;i<4;i++){cx+=pts[i][0];cy+=pts[i][1]}
+  cx/=4;cy/=4;
+  var r=rad(rotDeg),co=Math.cos(r),si=Math.sin(r),out=[];
+  for(i=0;i<4;i++){
+    var x=pts[i][0]-cx, y=pts[i][1]-cy;
+    out.push([x*co-y*si, x*si+y*co]);
+  }
+  var minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9;
+  for(i=0;i<4;i++){
+    if(out[i][0]<minx)minx=out[i][0]; if(out[i][0]>maxx)maxx=out[i][0];
+    if(out[i][1]<miny)miny=out[i][1]; if(out[i][1]>maxy)maxy=out[i][1];
+  }
+  var w=maxx-minx,hgt=maxy-miny;
+  var sc=Math.min((S-pad*2)/w,(S-pad*2)/hgt);
+  var ox=(S-w*sc)/2-minx*sc, oy=(S-hgt*sc)/2-miny*sc;
+  for(i=0;i<4;i++) out[i]=[out[i][0]*sc+ox, out[i][1]*sc+oy];
+  return out;
+}
+function seg(cls,a,b){
+  return '<line class="'+cls+'" x1="'+a[0].toFixed(1)+'" y1="'+a[1].toFixed(1)
+    +'" x2="'+b[0].toFixed(1)+'" y2="'+b[1].toFixed(1)+'"/>';
+}
+function txt(cls,p,s,anchor){
+  return '<text class="'+cls+'" x="'+p[0].toFixed(1)+'" y="'+(p[1]+6).toFixed(1)
+    +'" text-anchor="'+(anchor||'middle')+'">'+s+'</text>';
+}
+/* 평행 표시 꺾쇠 */
+function chevron(A,B,n,cls){
+  var M=mid(A,B), u=uv(A,B), px=-u[1], py=u[0], h='', k;
+  for(k=0;k<n;k++){
+    var o=(k-(n-1)/2)*7;
+    var cx=M[0]+u[0]*o, cy=M[1]+u[1]*o;
+    h+='<path class="chev'+(cls?' '+cls:'')+'" d="M'+(cx-u[0]*5+px*6).toFixed(1)+' '+(cy-u[1]*5+py*6).toFixed(1)
+      +' L'+(cx+u[0]*5).toFixed(1)+' '+(cy+u[1]*5).toFixed(1)
+      +' L'+(cx-u[0]*5-px*6).toFixed(1)+' '+(cy-u[1]*5-py*6).toFixed(1)+'"/>';
+  }
+  return h;
+}
+/* 길이가 같은 변에 같은 개수의 눈금 */
+function eqTicks(A,B,n){
+  var M=mid(A,B), u=uv(A,B), px=-u[1], py=u[0], h='', k;
+  for(k=0;k<n;k++){
+    var o=(k-(n-1)/2)*7;
+    var cx=M[0]+u[0]*o, cy=M[1]+u[1]*o;
+    h+=seg('eqt',[cx-px*7,cy-py*7],[cx+px*7,cy+py*7]);
+  }
+  return h;
+}
+/* 직각 표시 */
+function cornerMark(P,A,B,r){
+  var u=uv(P,A), v=uv(P,B);
+  var p1=[P[0]+u[0]*r,P[1]+u[1]*r], p2=[P[0]+v[0]*r,P[1]+v[1]*r];
+  var p3=[p1[0]+v[0]*r,p1[1]+v[1]*r];
+  return '<path class="rmk" d="M'+p1[0].toFixed(1)+' '+p1[1].toFixed(1)
+    +' L'+p3[0].toFixed(1)+' '+p3[1].toFixed(1)
+    +' L'+p2[0].toFixed(1)+' '+p2[1].toFixed(1)+'"/>';
+}
+/* 각의 호 */
+function arcAt(P,A,B,r){
+  var a0=Math.atan2(A[1]-P[1],A[0]-P[0]), a1=Math.atan2(B[1]-P[1],B[0]-P[0]);
+  var d=a1-a0;
+  while(d>Math.PI) d-=2*Math.PI;
+  while(d<-Math.PI) d+=2*Math.PI;
+  var n=16,ps=[],i;
+  for(i=0;i<=n;i++){
+    var t=a0+d*i/n;
+    ps.push((P[0]+r*Math.cos(t)).toFixed(1)+','+(P[1]+r*Math.sin(t)).toFixed(1));
+  }
+  return '<polyline class="arc" points="'+ps.join(' ')+'"/>';
+}
+function bisec(P,A,B){
+  var u=uv(P,A), v=uv(P,B);
+  var x=u[0]+v[0], y=u[1]+v[1], L=Math.sqrt(x*x+y*y);
+  if(L<1e-6) return [-u[1],u[0]];
+  return [x/L,y/L];
+}
+/* 사각형 그림. spec 은 QUADS 의 이름이거나 {name, pts} */
+function quadFig(spec,rotDeg,o){
+  o=o||{};
+  var S=o.size||320, pad=o.pad||44;
+  var D=Q(spec), pts=D.pts;
+  var P=placeQuad(pts,rotDeg,S,pad), i;
+  var cx=0,cy=0;
+  for(i=0;i<4;i++){cx+=P[i][0];cy+=P[i][1]}
+  cx/=4;cy/=4;
+  var C=[cx,cy];
+  var h='<svg class="geo" viewBox="0 0 '+S+' '+S+'" role="img" aria-label="'+D.name+'"'+(o.tap?' data-tap="1"':'')+'>';
+  if(o.fill) h+='<polygon class="fillq" points="'+P.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ')+'"/>';
+  var M=mid(P[0],P[2]);
+  if(o.diag){
+    for(i=0;i<2;i++) h+=seg('dg'+((o.dsol||o.dhi===i)?' solid':''),P[i],P[i+2]);
+    if(o.rmk) h+=cornerMark(M,P[0],P[1],15);
+  }
+  for(i=0;i<4;i++){
+    var cls='side'+(i===o.base?' base':'')+((o.sel&&o.sel.indexOf(i)>=0)?' sel':'');
+    h+=seg(cls,P[i],P[(i+1)%4]);
+  }
+  if(o.marks){
+    var pp=paraPairs(pts);
+    for(i=0;i<pp.length;i++){
+      var pr=pp[i], hl=(pr.indexOf(o.base)>=0)?'b':'';
+      h+=chevron(P[pr[0]],P[(pr[0]+1)%4],i+1,hl);
+      h+=chevron(P[pr[1]],P[(pr[1]+1)%4],i+1,hl);
+    }
+  }
+  if(o.eq){
+    var ec=eqClasses(pts);
+    for(i=0;i<4;i++) h+=eqTicks(P[i],P[(i+1)%4],ec.rank[ec.cls[i]]);
+  }
+  if(o.angs){
+    for(i=0;i<4;i++){
+      if(o.angs[i]==null) continue;
+      var prv=P[(i+3)%4], nxt=P[(i+1)%4];
+      h+=arcAt(P[i],prv,nxt,20);
+      if(o.angs[i]!==''){
+        var bb=bisec(P[i],prv,nxt);
+        var q=[P[i][0]+bb[0]*38,P[i][1]+bb[1]*38];
+        h+=txt(o.angs[i]==='?'?'qmk':'avl',q,o.angs[i]);
+      }
+    }
+  }
+  if(o.slen){
+    for(i=0;i<4;i++){
+      if(o.slen[i]==null||o.slen[i]==='') continue;
+      var Ms=mid(P[i],P[(i+1)%4]), ou=uv(C,Ms);
+      h+=txt(o.slen[i]==='?'?'qmk':'slb',[Ms[0]+ou[0]*20,Ms[1]+ou[1]*20],o.slen[i]);
+    }
+  }
+  if(o.dlen){
+    for(i=0;i<4;i++){
+      if(o.dlen[i]==null||o.dlen[i]==='') continue;
+      var Md=mid(M,P[i]), du=uv(M,P[i]);
+      h+=txt(o.dlen[i]==='?'?'qmk':'slb',[Md[0]-du[1]*18,Md[1]+du[0]*18],o.dlen[i]);
+    }
+  }
+  if(o.diag){
+    h+='<circle class="ctr" cx="'+M[0].toFixed(1)+'" cy="'+M[1].toFixed(1)+'" r="5"/>';
+    var cb=bisec(M,P[2],P[3]);
+    h+=txt('vlb b',[M[0]+cb[0]*22,M[1]+cb[1]*22],CEN);
+  }
+  if(o.vtx!==false){
+    for(i=0;i<4;i++){
+      h+='<circle class="vtx" cx="'+P[i][0].toFixed(1)+'" cy="'+P[i][1].toFixed(1)+'" r="5"/>';
+      var vo=uv(C,P[i]);
+      h+=txt('vlb',[P[i][0]+vo[0]*20,P[i][1]+vo[1]*20],HANGUL[i]);
+    }
+  }
+  if(o.tap){
+    for(i=0;i<4;i++){
+      if(i===o.base) continue;
+      h+='<line class="hit" data-i="'+i+'" x1="'+P[i][0].toFixed(1)+'" y1="'+P[i][1].toFixed(1)
+        +'" x2="'+P[(i+1)%4][0].toFixed(1)+'" y2="'+P[(i+1)%4][1].toFixed(1)
+        +'" role="button" tabindex="0" aria-label="'+sideName(i)+'"/>';
+    }
+  }
+  return h+'</svg>';
+}
+
+var DEF_PG='<div class="defbox">마주 보는 <b>두 쌍의 변</b>이 서로 평행한 사각형을 <b>평행사변형</b>이라고 합니다. 한 쌍만 평행하면 사다리꼴일 뿐이에요.</div>';
+var DEF_PGP='<div class="defbox">평행사변형에서는 <b>마주 보는 두 변의 길이가 같고</b>, <b>마주 보는 두 각의 크기도 같습니다.</b> 그리고 <b>이웃한 두 각의 크기의 합은 180°</b>예요.</div>';
+var DEF_RH='<div class="defbox"><b>네 변의 길이가 모두 같은</b> 사각형을 <b>마름모</b>라고 합니다. 마름모는 마주 보는 두 쌍의 변도 저절로 평행해져요.</div>';
+var DEF_RHD='<div class="defbox">마름모의 <b>두 대각선은 서로 수직으로 만나고</b>, 만나는 점에서 <b>서로를 반으로 나눕니다(이등분)</b>.</div>';
+var DEF_INC='<div class="defbox">직사각형과 정사각형도 마주 보는 두 쌍의 변이 평행하니 <b>평행사변형</b>이에요. 또 정사각형은 네 변이 모두 같으니 <b>마름모</b>이기도 합니다.</div>';
+
+/* 도형 한 줄 설명 (평행 쌍 수) */
+function pgLine(o){
+  var D=Q(o.k), n=paraPairs(D.pts).length;
+  return '<b>'+o.nm+'</b> ('+D.name+') : 평행한 변 '+n+'쌍 → '+(n===2?'평행사변형 ○':'평행사변형 ✕');
+}
+function rhLine(o){
+  var D=Q(o.k), ec=eqClasses(D.pts);
+  var how=(ec.n===1)?'네 변의 길이가 모두 같아요':(ec.n===2?'긴 변 두 개와 짧은 변 두 개예요':'네 변의 길이가 다 달라요');
+  return '<b>'+o.nm+'</b> ('+D.name+') : '+how+' → '+(ec.n===1?'마름모 ○':'마름모 ✕');
+}
+
+/* ---- 1. 평행사변형 찾기 ---- */
+var PGS=['para','para2','rect','square','rhom','rhom2'];
+var NOPG=['trap','rtrap','trap2','kite','gen1','gen2'];
+function genPg(lv){
+  var q,i,opts;
+  if(lv===1){
+    var good=pick(['para','para2','rhom','rhom2']);
+    var bads=shuffle(['trap','rtrap','trap2','gen1','gen2','kite']).slice(0,2);
+    opts=shuffle([{k:good,correct:true}].concat(bads.map(function(k){return {k:k,correct:false}})));
+    q={type:'pg',sub:'one',opts:opts};
+    q.question='<b>평행사변형</b>인 것은 어느 것일까요?';
+    q.label='평행사변형 찾기';
+  }else if(lv===2){
+    var bad=pick(['trap','rtrap','trap2']);
+    var goods=shuffle(PGS).slice(0,2);
+    opts=shuffle([{k:bad,correct:true}].concat(goods.map(function(k){return {k:k,correct:false}})));
+    q={type:'pg',sub:'not',opts:opts};
+    q.question='<b>평행사변형이 아닌</b> 것은 어느 것일까요?';
+    q.label='평행사변형이 아닌 것 찾기';
+  }else{
+    var n=rnd(2,3);
+    var gs=shuffle(PGS).slice(0,n), bs=shuffle(NOPG).slice(0,4-n);
+    opts=shuffle(gs.map(function(k){return {k:k,correct:true}}).concat(bs.map(function(k){return {k:k,correct:false}})));
+    q={type:'pg',sub:'all',opts:opts};
+    q.question='<b>평행사변형을 모두</b> 골라 주세요.';
+    q.label='평행사변형 모두 고르기';
+  }
+  q.lv=lv;
+  for(i=0;i<opts.length;i++){
+    opts[i].rot=(lv===3)?pick([0,0,15,-15,25,-25]):pick([0,0,0,10,-10]);
+    opts[i].nm=['가','나','다','라'][i];
+    /* 정답 표시는 좌표로 다시 확인한다 */
+    opts[i].pg=isParallelogram(QUADS[opts[i].k].pts);
+  }
+  q.key='pg'+q.sub+opts.map(function(o){return o.k+o.rot}).join('_');
+  var yes=opts.filter(function(o){return o.pg}).map(function(o){return o.nm});
+  var inc=opts.filter(function(o){return o.k==='rect'||o.k==='square'||o.k==='rhom'||o.k==='rhom2'});
+  q.steps=[
+    {t:'평행사변형의 뜻',b:'<p>마주 보는 변이 <b>두 쌍 모두 평행</b>해야 평행사변형이에요. 한 쌍만 평행하면 사다리꼴이지요.</p>'+DEF_PG},
+    {t:'마주 보는 변만 보면 돼요',b:'<p>맞붙은 변은 한 점에서 만나니 평행할 수 없어요. 그래서 <b>마주 보는 두 쌍</b>만 확인하면 됩니다. '
+      +'폭이 어디서나 같으면 평행, 한쪽이 벌어지면 평행이 아니에요.</p>'
+      +(inc.length?DEF_INC:'')},
+    {t:'하나씩 보면',b:'<p>'+opts.map(pgLine).join('<br>')+'</p>'
+      +'<p style="margin-top:6px">'+(yes.length?('평행사변형은 <b>'+yes.join(', ')+'</b>예요.'):'평행사변형이 없어요.')+'</p>',
+     fig:'<div class="fig">'+opts.map(function(o){
+        return '<div class="geowrap">'+quadFig(o.k,o.rot,{size:190,pad:34,marks:true})+'</div>';
+      }).join('')+'</div>',reveal:true}
+  ];
+  return q;
+}
+
+/* ---- 2. 평행사변형의 변과 각 ---- */
+function genPgProp(lv){
+  var a=rnd(4,9), b=rnd(3,8), g=0;
+  while(a===b&&g<40){b=rnd(3,8);g++}
+  if(a===b) b=a+1;
+  var th=pick([50,55,60,65,70,75,105,110,115,120,125,130]);
+  var D=mkPara(a,b,th), rot=(lv===3)?pick([0,0,12,-12,20]):pick([0,0,0,10,-10]);
+  var q={type:'pgp',lv:lv,a:a,b:b,th:th,rot:rot,shape:D,key:'pp'+lv+a+'_'+b+'_'+th+'_'+rot};
+  if(lv===1){
+    q.sub='side';
+    q.ask=2;
+    q.ans=a;
+    q.slen=[a+' cm',b+' cm',null,null];
+    q.question='<b>'+sideName(2)+'의 길이</b>는 몇 cm일까요?';
+    q.label='평행사변형 · '+sideName(2)+'의 길이';
+    q.choices=shuffle([{t:a+' cm',correct:true}].concat(
+      distract(a,[b,a+b,a+1,a+2],2).map(function(v){return {t:v+' cm',correct:false}})));
+    q.steps=[
+      {t:'평행사변형의 변',b:'<p>평행사변형은 마주 보는 두 쌍의 변이 평행해서, <b>마주 보는 두 변의 길이가 서로 같아요.</b></p>'+DEF_PGP},
+      {t:'마주 보는 변을 찾아요',b:'<p>'+sideName(2)+'과 마주 보는 변은 <b>'+sideName(0)+'</b>이에요. '
+        +sideName(0)+'의 길이가 <span class="num">'+a+' cm</span>라고 나와 있지요.</p>',
+       fig:'<div class="fig"><div class="geowrap">'
+          +quadFig(D,rot,{size:250,pad:46,base:0,sel:[2],marks:true,slen:[a+' cm',b+' cm','?','']})+'</div></div>'},
+      {t:'답',b:'<p>그래서 '+sideName(2)+'도 <b>'+a+' cm</b>예요. '
+        +'<span class="num">'+b+' cm</span>는 옆에 있는 '+sideName(1)+'의 길이니까 헷갈리지 않도록 조심해요.</p>',
+       fig:'<div class="fig"><div class="geowrap">'
+          +quadFig(D,rot,{size:250,pad:46,eq:true,slen:[a+' cm',b+' cm',a+' cm',b+' cm']})+'</div></div>',reveal:true}
+    ];
+  }else if(lv===2){
+    q.sub='ang';
+    q.ask=2;
+    q.ans=th;
+    q.question='<b>'+angName(2)+'의 크기</b>는 몇 도일까요?';
+    q.label='평행사변형 · '+angName(2)+'의 크기';
+    q.choices=shuffle([{t:th+'°',correct:true}].concat(
+      distract(th,[180-th,90,th+10],2).map(function(v){return {t:v+'°',correct:false}})));
+    q.steps=[
+      {t:'평행사변형의 각',b:'<p>평행사변형에서는 <b>마주 보는 두 각의 크기가 같아요.</b> 변이 나란히 밀려 있을 뿐, 벌어진 정도는 그대로니까요.</p>'+DEF_PGP},
+      {t:'마주 보는 각을 찾아요',b:'<p>'+angName(2)+'과 마주 보는 각은 <b>'+angName(0)+'</b>이에요. '
+        +angName(0)+'의 크기가 <span class="num">'+th+'°</span>라고 나와 있지요.</p>',
+       fig:'<div class="fig"><div class="geowrap">'
+          +quadFig(D,rot,{size:250,pad:46,angs:[th+'°',null,'?',null],marks:true})+'</div></div>'},
+      {t:'답',b:'<p>그래서 '+angName(2)+'도 <b>'+th+'°</b>예요. 옆에 있는 '+angName(1)+'과 '+angName(3)+'은 '
+        +'<span class="num">'+(180-th)+'°</span>로 서로 같아요.</p>',
+       fig:'<div class="fig"><div class="geowrap">'
+          +quadFig(D,rot,{size:250,pad:46,angs:[th+'°',(180-th)+'°',th+'°',(180-th)+'°']})+'</div></div>',reveal:true}
+    ];
+  }else{
+    q.sub='sum';
+    q.ask=1;
+    q.ans=180-th;
+    q.question='<b>'+angName(1)+'의 크기</b>는 몇 도일까요?';
+    q.label='평행사변형 · 이웃한 두 각의 합';
+    q.choices=shuffle([{t:(180-th)+'°',correct:true}].concat(
+      distract(180-th,[th,90,360-th],2).map(function(v){return {t:v+'°',correct:false}})));
+    q.steps=[
+      {t:'이웃한 두 각',b:'<p>평행사변형에서 <b>이웃한 두 각의 크기의 합은 180°</b>예요. 두 각이 모여 한 직선을 이루기 때문이에요.</p>'+DEF_PGP},
+      {t:'180°에서 빼면 돼요',b:'<p>'+angName(0)+'과 '+angName(1)+'은 이웃한 두 각이에요. '
+        +'<span class="num">'+angName(0)+' = '+th+'°</span>이니까 '+angName(1)+'은 <span class="num">180° - '+th+'°</span>로 구해요.</p>',
+       fig:'<div class="fig"><div class="geowrap">'
+          +quadFig(D,rot,{size:250,pad:46,angs:[th+'°','?',null,null],marks:true})+'</div></div>'},
+      {t:'답',b:'<p><span class="num">180 - '+th+' = '+(180-th)+'</span> 이니까 '+angName(1)+'은 <b>'+(180-th)+'°</b>예요. '
+        +'마주 보는 '+angName(3)+'도 같은 <span class="num">'+(180-th)+'°</span>랍니다.</p>',
+       fig:'<div class="fig"><div class="geowrap">'
+          +quadFig(D,rot,{size:250,pad:46,angs:[th+'°',(180-th)+'°',th+'°',(180-th)+'°']})+'</div></div>',reveal:true}
+    ];
+  }
+  return q;
+}
+
+/* ---- 3. 마름모 찾기 ---- */
+var RHS=['rhom','rhom2','square'];
+var NORH=['para','para2','rect','trap','rtrap','trap2','kite','gen1','gen2'];
+function genRh(lv){
+  var q,i,opts;
+  if(lv===1){
+    var good=pick(['rhom','rhom2']);
+    var bads=shuffle(['para','para2','rect','trap','rtrap','kite']).slice(0,2);
+    opts=shuffle([{k:good,correct:true}].concat(bads.map(function(k){return {k:k,correct:false}})));
+    q={type:'rh',sub:'one',opts:opts};
+    q.question='<b>마름모</b>인 것은 어느 것일까요?';
+    q.label='마름모 찾기';
+  }else if(lv===2){
+    var bad=pick(['para','para2','kite','rect']);
+    var goods=shuffle(RHS).slice(0,2);
+    opts=shuffle([{k:bad,correct:true}].concat(goods.map(function(k){return {k:k,correct:false}})));
+    q={type:'rh',sub:'not',opts:opts};
+    q.question='<b>마름모가 아닌</b> 것은 어느 것일까요?';
+    q.label='마름모가 아닌 것 찾기';
+  }else{
+    var n=rnd(2,3);
+    var gs=shuffle(RHS).slice(0,n), bs=shuffle(NORH).slice(0,4-n);
+    opts=shuffle(gs.map(function(k){return {k:k,correct:true}}).concat(bs.map(function(k){return {k:k,correct:false}})));
+    q={type:'rh',sub:'all',opts:opts};
+    q.question='<b>마름모를 모두</b> 골라 주세요.';
+    q.label='마름모 모두 고르기';
+  }
+  q.lv=lv;
+  for(i=0;i<opts.length;i++){
+    opts[i].rot=(lv===3)?pick([0,0,15,-15,25,-25]):pick([0,0,0,10,-10]);
+    opts[i].nm=['가','나','다','라'][i];
+    opts[i].rh=isRhombus(QUADS[opts[i].k].pts);
+  }
+  q.key='rh'+q.sub+opts.map(function(o){return o.k+o.rot}).join('_');
+  var yes=opts.filter(function(o){return o.rh}).map(function(o){return o.nm});
+  var hasSq=opts.some(function(o){return o.k==='square'});
+  q.steps=[
+    {t:'마름모의 뜻',b:'<p>마름모는 <b>네 변의 길이가 모두 같은</b> 사각형이에요. 기울어져 있는지, 똑바로 서 있는지는 상관없어요.</p>'+DEF_RH},
+    {t:'길이만 보면 돼요',b:'<p>각이 뾰족한지 넓은지는 보지 않아요. <b>네 변을 한 변씩 재어 모두 같은지</b>만 보면 됩니다. '
+      +'<b>변 길이 표시</b> 단추를 누르면 같은 길이의 변에 같은 개수의 눈금이 나타나요.</p>'
+      +(hasSq?DEF_INC:'')},
+    {t:'하나씩 보면',b:'<p>'+opts.map(rhLine).join('<br>')+'</p>'
+      +'<p style="margin-top:6px">'+(yes.length?('마름모는 <b>'+yes.join(', ')+'</b>예요.'):'마름모가 없어요.')+'</p>',
+     fig:'<div class="fig">'+opts.map(function(o){
+        return '<div class="geowrap">'+quadFig(o.k,o.rot,{size:190,pad:34,eq:true})+'</div>';
+      }).join('')+'</div>',reveal:true}
+  ];
+  return q;
+}
+
+/* ---- 4. 마름모의 대각선 ---- */
+function genRhDiag(lv){
+  var m=rnd(3,8), n=rnd(3,8), g=0;
+  while(n===m&&g<40){n=rnd(3,8);g++}
+  if(n===m) n=m+1;
+  var D=mkRhomb(m,n), rot=(lv===3)?pick([0,0,15,-15,25]):pick([0,0,0,10,-10]);
+  var q={type:'rd',lv:lv,m:m,n:n,rot:rot,shape:D,key:'rd'+lv+m+'_'+n+'_'+rot};
+  if(lv===1){
+    q.sub='perp';
+    q.ans=90;
+    q.question='두 대각선이 만나서 이루는 <b>각</b>은 몇 도일까요?';
+    q.label='마름모 · 두 대각선이 이루는 각';
+    q.given='';
+    q.choices=shuffle([{t:'90°',correct:true},{t:'60°',correct:false},{t:'180°',correct:false}]);
+    q.steps=[
+      {t:'대각선을 그어 봐요',b:'<p>마주 보는 두 꼭짓점을 이은 선을 <b>대각선</b>이라고 해요. 마름모에는 대각선이 두 개 있어요.</p>'+DEF_RHD},
+      {t:'네 변이 같으니까',b:'<p>마름모는 네 변의 길이가 모두 같아서, 대각선을 그으면 똑같은 모양의 삼각형 네 개로 나뉘어요. '
+        +'그래서 두 대각선은 <b>직각</b>으로 만나요.</p>'},
+      {t:'답',b:'<p>두 대각선이 이루는 각은 <b>90°</b>예요. 만나는 점 '+CEN+'에 직각 표시를 해 둡니다.</p>',
+       fig:'<div class="fig"><div class="geowrap">'
+          +quadFig(D,rot,{size:250,pad:46,diag:true,rmk:true,dsol:true})+'</div></div>',reveal:true}
+    ];
+  }else if(lv===2){
+    q.sub='half';
+    q.ans=n;
+    q.given=diagName(0)+'의 길이는 '+(2*n)+' cm';
+    q.hint='빨간 ?를 구해요';
+    q.question='<b>'+halfName(0)+'의 길이</b>는 몇 cm일까요?';
+    q.label='마름모 · '+halfName(0)+'의 길이';
+    q.choices=shuffle([{t:n+' cm',correct:true}].concat(
+      distract(n,[2*n,n+1,4*n,m].filter(function(v){return v!==n}),2).map(function(v){return {t:v+' cm',correct:false}})));
+    q.steps=[
+      {t:'대각선은 서로를 반으로 나눠요',b:'<p>마름모의 두 대각선은 만나는 점에서 <b>서로를 똑같이 반으로 나눕니다.</b> 이것을 이등분한다고 해요.</p>'+DEF_RHD},
+      {t:'반으로 나누면',b:'<p>'+diagName(0)+'의 길이가 <span class="num">'+(2*n)+' cm</span>이고, 점 '+CEN+'이 그 가운데예요. '
+        +'그러니 <span class="num">'+(2*n)+' ÷ 2</span>를 하면 돼요.</p>',
+       fig:'<div class="fig"><div class="geowrap">'
+          +quadFig(D,rot,{size:250,pad:46,diag:true,dlen:['?',null,'',null]})+'</div></div>'},
+      {t:'답',b:'<p><span class="num">'+(2*n)+' ÷ 2 = '+n+'</span> 이니까 '+halfName(0)+'은 <b>'+n+' cm</b>예요. '
+        +'반대쪽 '+halfName(2)+'도 똑같이 <span class="num">'+n+' cm</span>랍니다.</p>',
+       fig:'<div class="fig"><div class="geowrap">'
+          +quadFig(D,rot,{size:250,pad:46,diag:true,rmk:true,dlen:[n+' cm',null,n+' cm',null]})+'</div></div>',reveal:true}
+    ];
+  }else{
+    q.sub='full';
+    q.ans=2*m;
+    q.given=halfName(1)+'의 길이는 '+m+' cm';
+    q.hint='굵게 그린 대각선 전체의 길이를 구해요';
+    q.question='<b>'+diagName(1)+'의 길이</b>는 몇 cm일까요?';
+    q.label='마름모 · '+diagName(1)+'의 길이';
+    q.choices=shuffle([{t:(2*m)+' cm',correct:true}].concat(
+      distract(2*m,[m,4*m,2*m+2,2*n].filter(function(v){return v!==2*m}),2).map(function(v){return {t:v+' cm',correct:false}})));
+    q.steps=[
+      {t:'반쪽에서 전체로',b:'<p>점 '+CEN+'은 두 대각선이 만나는 점이고, 대각선을 <b>똑같이 반으로</b> 나눠요. '
+        +'그러니 반쪽을 알면 <b>두 배</b>를 해서 전체를 구할 수 있어요.</p>'+DEF_RHD},
+      {t:'두 배 하기',b:'<p>'+halfName(1)+'이 <span class="num">'+m+' cm</span>이니 반대쪽 '+halfName(3)+'도 <span class="num">'+m+' cm</span>예요. '
+        +'둘을 더하면 <span class="num">'+m+' + '+m+'</span>, 즉 <span class="num">'+m+' × 2</span>입니다.</p>',
+       fig:'<div class="fig"><div class="geowrap">'
+          +quadFig(D,rot,{size:250,pad:46,diag:true,dlen:[null,m+' cm',null,'?']})+'</div></div>'},
+      {t:'답',b:'<p><span class="num">'+m+' × 2 = '+(2*m)+'</span> 이니까 '+diagName(1)+'은 <b>'+(2*m)+' cm</b>예요.</p>',
+       fig:'<div class="fig"><div class="geowrap">'
+          +quadFig(D,rot,{size:250,pad:46,diag:true,rmk:true,dlen:[null,m+' cm',null,m+' cm']})+'</div></div>',reveal:true}
+    ];
+  }
+  return q;
+}
+// ==LOGIC-END==
+
+/* ---- 저장 ---- */
+var KEY='quad-shape-v1';
+var save={coins:0,stars:{},seals:{gold:0,silver:0,bronze:0},sound:true};
+try{
+  var raw=localStorage.getItem(KEY);
+  if(raw){var so=JSON.parse(raw);if(so&&typeof so==='object'){
+    save.coins=+so.coins||0;save.stars=so.stars||{};save.sound=so.sound!==false;
+    if(so.seals)['gold','silver','bronze'].forEach(function(k){save.seals[k]=+so.seals[k]||0});
+  }}
+}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}}
+
+var $=function(s){return document.querySelector(s)};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+
+/* ---- 돋보기 조수 ---- */
+function glass(mood){
+  var c='var(--indigo)', ink='#13183C';
+  var h='<svg viewBox="0 0 130 120" role="img" aria-label="돋보기">';
+  h+='<ellipse cx="66" cy="113" rx="38" ry="5" fill="'+ink+'" opacity=".12"/>';
+  h+='<line x1="84" y1="78" x2="110" y2="104" stroke="'+c+'" stroke-width="14" stroke-linecap="round"/>';
+  /* 렌즈 안은 어느 테마에서나 밝게. 어두운 테마에서 검은 눈·입이 묻히지 않도록 */
+  h+='<circle cx="56" cy="50" r="40" fill="#EEF1FC" stroke="'+c+'" stroke-width="9"/>';
+  var eye=function(x,y){
+    if(mood==='happy') return '<path d="M'+(x-5)+' '+(y+2)+' Q'+x+' '+(y-6)+' '+(x+5)+' '+(y+2)+'" fill="none" stroke="'+ink+'" stroke-width="3" stroke-linecap="round"/>';
+    if(mood==='oops') return '<path d="M'+(x-4)+' '+(y-3)+' L'+(x+4)+' '+(y+3)+'M'+(x-4)+' '+(y+3)+' L'+(x+4)+' '+(y-3)+'" stroke="'+ink+'" stroke-width="2.6" stroke-linecap="round"/>';
+    return '<circle cx="'+x+'" cy="'+y+'" r="3.8" fill="'+ink+'"/>';
+  };
+  h+=eye(44,45)+eye(68,45);
+  if(mood==='happy') h+='<path d="M47 60 Q56 72 65 60 Z" fill="#3A1020"/>';
+  else if(mood==='oops') h+='<path d="M47 64 Q56 57 65 64" fill="none" stroke="'+ink+'" stroke-width="2.6" stroke-linecap="round"/>';
+  else h+='<path d="M47 60 Q56 67 65 60" fill="none" stroke="'+ink+'" stroke-width="2.6" stroke-linecap="round"/>';
+  return h+'</svg>';
+}
+var SEAL={gold:{n:'금 도장',c:'var(--star)'},silver:{n:'은 도장',c:'#9AA7B4'},bronze:{n:'동 도장',c:'#B07A45'}};
+function sealSVG(kind){
+  var c=SEAL[kind].c;
+  return '<svg viewBox="0 0 120 120" role="img" aria-label="'+SEAL[kind].n+'">'
+    +'<rect x="13" y="13" width="94" height="94" rx="12" fill="none" stroke="'+c+'" stroke-width="7"/>'
+    +'<polygon points="60,31 89,60 60,89 31,60" fill="none" stroke="'+c+'" stroke-width="7"/></svg>';
+}
+
+/* ---- 소리 ---- */
+var AC=null;
+function tone(seq){
+  if(!save.sound) return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended') AC.resume();
+    var t0=AC.currentTime;
+    seq.forEach(function(s){
+      var o=AC.createOscillator(),g=AC.createGain();
+      o.type='triangle';o.frequency.value=s[0];
+      g.gain.setValueAtTime(0.0001,t0+s[1]);
+      g.gain.exponentialRampToValueAtTime(0.14,t0+s[1]+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+s[1]+s[2]);
+      o.connect(g);g.connect(AC.destination);
+      o.start(t0+s[1]);o.stop(t0+s[1]+s[2]+0.05);
+    });
+  }catch(e){}
+}
+var SND={good:[[659,0,.13],[988,.11,.25]],bad:[[185,0,.27]],tap:[[520,0,.05]],
+  win:[[587,0,.13],[784,.11,.13],[988,.22,.13],[1319,.33,.33]]};
+function paintSound(){$$('.snd').forEach(function(b){b.textContent=save.sound?'소리 켜짐':'소리 꺼짐'})}
+
+/* ---- 모드 ---- */
+var MODES={
+  pgFind:{name:'평행사변형 찾기',desc:'마주 보는 두 쌍이 모두 나란한지 봐요',
+    lv:['평행사변형 찾기','아닌 것 가려내기','모두 고르기'],group:0,
+    ico:quadFig('para',0,{size:110,pad:20,marks:true,vtx:false})},
+  pgProp:{name:'평행사변형의 변과 각',desc:'마주 보는 변과 각, 이웃한 두 각의 합',
+    lv:['마주 보는 변의 길이','마주 보는 각의 크기','이웃한 두 각의 합'],group:0,
+    ico:quadFig(mkPara(6,4,65),0,{size:110,pad:22,angs:['',null,'',null],fill:true,vtx:false})},
+  rhFind:{name:'마름모 찾기',desc:'네 변의 길이가 모두 같은지 봐요',
+    lv:['마름모 찾기','아닌 것 가려내기','모두 고르기'],group:1,
+    ico:quadFig('rhom',0,{size:110,pad:20,eq:true,vtx:false})},
+  rhDiag:{name:'마름모의 대각선',desc:'수직으로 만나 서로를 반으로 나눠요',
+    lv:['두 대각선이 이루는 각','반으로 나눈 길이','대각선 전체 길이'],group:1,
+    ico:quadFig(mkRhomb(4,5),0,{size:110,pad:20,diag:true,rmk:true,dsol:true,vtx:false})}
+};
+var GROUPS=[
+  {t:'평행사변형',s:'마주 보는 두 쌍의 변이 평행한 사각형',keys:['pgFind','pgProp']},
+  {t:'마름모',s:'네 변의 길이가 모두 같은 사각형',keys:['rhFind','rhDiag']}
+];
+var GENS={pgFind:genPg,pgProp:genPgProp,rhFind:genRh,rhDiag:genRhDiag};
+var GOOD=['정확해요!','네 변을 다 봤네요!','정답이에요!','우와, 탐정 솜씨네요!','마주 보는 쪽을 잘 찾았어요!','빈틈이 없네요!'];
+var OOPS=['앗, 다시 볼까요?','조금만 더 생각해 봐요.','괜찮아요, 해설을 같이 봐요.','거의 다 왔어요!'];
+
+/* ---- 화면 ---- */
+var starsHTML=function(s){return [1,2,3].map(function(i){return '<span class="st'+(i<=s?' on':'')+'">★</span>'}).join('')};
+function show(id){
+  ['home','play','result'].forEach(function(s){$('#'+s).hidden=(s!==id)});
+  $('#'+id).scrollTop=0;
+}
+function paintCoins(){$('#coinHome').textContent=save.coins;$('#coinPlay').textContent=save.coins}
+function renderNote(){
+  $('#note').innerHTML=glass('idle')
+    +'<div class="nt"><b>평행사변형과 마름모</b>'
+    +'<p>마주 보는 두 쌍의 변이 평행하면 <b>평행사변형</b>, 네 변의 길이가 모두 같으면 <b>마름모</b>예요. '
+    +'마주 보는 변과 각은 서로 같고, 마름모의 두 대각선은 수직으로 만나 서로를 반으로 나눠요.</p></div>';
+  var tot=save.seals.gold+save.seals.silver+save.seals.bronze;
+  $('#badges').innerHTML=tot
+    ? '<span>모은 도장</span>'+['gold','silver','bronze'].map(function(k){
+        return '<span class="badge-i" title="'+SEAL[k].n+'">'+sealSVG(k)+'<span>'+save.seals[k]+'</span></span>';
+      }).join('')
+    : '<span>한 판을 끝내면 모양 도장을 찍어 드려요.</span>';
+}
+function renderHome(){
+  paintCoins();paintSound();renderNote();
+  $('#groups').innerHTML=GROUPS.map(function(G){
+    return '<h2 class="grouptitle">'+G.t+' <span>'+G.s+'</span></h2><div class="cards">'
+      +G.keys.map(function(m){
+        var M=MODES[m];
+        var lvs=[1,2,3].map(function(l){
+          var s=save.stars[m+l]||0;
+          return '<button class="lv" type="button" data-mode="'+m+'" data-lv="'+l+'"><span class="lv-n">'+l+'단계</span>'
+            +'<span class="lv-d">'+M.lv[l-1]+'</span><span class="stars" role="img" aria-label="별 '+s+'개">'+starsHTML(s)+'</span></button>';
+        }).join('');
+        return '<article class="card"><div class="ctop"><div class="ico">'+M.ico+'</div><div><h2>'+M.name+'</h2><p>'+M.desc+'</p></div></div>'
+          +'<div class="lvs">'+lvs+'</div></article>';
+      }).join('')+'</div>';
+  }).join('');
+}
+
+/* ---- 게임 ---- */
+var G=null;
+function startGame(mode,lv){
+  G={mode:mode,lv:lv,i:0,total:8,first:0,streak:0,earned:0,results:[],used:{},log:[],q:null,wrong:0,done:false,
+     tool:false,sel:[]};
+  $('#mName').textContent=MODES[mode].name;
+  $('#lName').textContent=lv+'단계 · '+MODES[mode].lv[lv-1];
+  show('play');
+  nextQ();
+}
+function setFace(mood){$('#face').innerHTML=glass(mood)}
+function fb(t,c){var e=$('#fb');e.innerHTML=t||'';e.className=c||''}
+function renderPips(){
+  $('#pips').innerHTML=Array.from({length:G.total},function(_,i){
+    return '<i class="pip '+(G.results[i]||'')+(i===G.i?' cur':'')+'"></i>';
+  }).join('');
+  $('#pips').setAttribute('aria-label',(G.i+1)+' / '+G.total+'번째 문제');
+  $('#qn').textContent=(G.i+1)+' / '+G.total;
+}
+function stepsHTML(steps){
+  return '<div class="steps">'+steps.map(function(s){
+    return '<div class="step"><div class="sb"><h3>'+s.t+'</h3>'+s.b+(s.fig||'')+'</div></div>';
+  }).join('')+'</div>';
+}
+function renderSol(full,won){
+  var steps=G.q.steps.filter(function(s){return full||!s.reveal});
+  if(!steps.length){$('#sol').hidden=true;return}
+  $('#sol').hidden=false;
+  var head=full?(won?'정답! 왜 그런지 같이 볼까요':'해설'):'힌트';
+  var pill=full?(won?'맞혀도 해설은 꼭 보기':'끝까지 같이 풀어 봐요'):'여기까지만 알려줄게요';
+  $('#sol').innerHTML='<div class="sol-h"><span>'+head+'</span><span class="pill">'+pill+'</span></div>'+stepsHTML(steps);
+}
+function hideSol(){$('#sol').hidden=true;$('#sol').innerHTML=''}
+
+function isMulti(q){return (q.type==='pg'||q.type==='rh')&&q.sub==='all'}
+function nextQ(){
+  G.done=false;G.wrong=0;G.tool=false;G.sel=[];
+  var q,tries=0;
+  do{q=GENS[G.mode](G.lv);tries++}while(G.used[q.key]&&tries<60);
+  G.used[q.key]=1;G.q=q;
+  setFace('idle');fb('');hideSol();
+  $('#next').hidden=true;$('#hintBtn').hidden=false;
+  $('#check').hidden=!isMulti(q);
+  $('#check').textContent='다 골랐어요!';
+  renderQ();renderPips();paintCoins();
+}
+/* 문제에 보여 줄 도형 설정 */
+function figOpts(q){
+  var o={size:320,pad:52};
+  if(q.type==='pgp'){
+    o.marks=G.tool;
+    if(q.sub==='side') o.slen=[q.a+' cm',q.b+' cm','?',null];
+    else if(q.sub==='ang') o.angs=[q.th+'°',null,'?',null];
+    else o.angs=[q.th+'°','?',null,null];
+  }else{
+    o.diag=true;
+    o.rmk=G.tool;
+    if(q.sub==='half'){o.dhi=0;o.dlen=['?',null,null,null]}
+    else if(q.sub==='full'){o.dhi=1;o.dlen=[null,q.m+' cm',null,null]}
+  }
+  return o;
+}
+function renderQ(){
+  var q=G.q,h='';
+  if(q.type==='pg'||q.type==='rh'){
+    var useMark=(q.type==='pg');
+    h='<div class="optrow">'+q.opts.map(function(o,i){
+        return '<button class="opt'+(G.sel.indexOf(i)>=0?' sel':'')+'" type="button" data-ans="'+i+'">'
+          +quadFig(o.k,o.rot,{size:190,pad:34,marks:useMark&&G.tool,eq:!useMark&&G.tool})
+          +'<span class="onm">'+o.nm+'</span></button>';
+      }).join('')+'</div>'
+      +'<div class="tools"><button class="btn ghost'+(G.tool?' on':'')+'" id="tool" type="button">'
+      +(useMark?'평행 표시 ':'변 길이 표시 ')+(G.tool?'끄기':'켜기')+'</button></div>'
+      +(q.sub==='all'
+        ? '<div class="tip">'+(G.sel.length?('고른 것: '+G.sel.map(function(i){return q.opts[i].nm}).join(', '))
+            :(useMark?'평행사변형을 모두 누르세요. 다시 누르면 취소돼요.':'마름모를 모두 누르세요. 다시 누르면 취소돼요.'))+'</div>'
+        : '');
+  }else{
+    h='<div class="geowrap">'+quadFig(q.shape,q.rot,figOpts(q))+'</div>';
+    if(q.given) h+='<div class="readout"><span>'+q.given+'</span><small>'+(q.hint||'')+'</small></div>';
+    h+='<div class="tools"><button class="btn ghost'+(G.tool?' on':'')+'" id="tool" type="button">'
+      +(q.type==='pgp'?'평행 표시 ':'직각 표시 ')+(G.tool?'끄기':'켜기')+'</button></div>'
+      +'<div class="choices">'+q.choices.map(function(c,i){
+        return '<button class="ch" type="button" data-ans="'+i+'">'+c.t+'</button>';
+      }).join('')+'</div>';
+  }
+  $('#say').innerHTML=q.question;
+  $('#board').innerHTML=h;
+}
+
+function reveal(){
+  renderSol(true,false);
+  var q=G.q;
+  if(q.type==='pg'||q.type==='rh'){
+    var useMark=(q.type==='pg');
+    G.tool=true;
+    $('#board').innerHTML='<div class="optrow">'+q.opts.map(function(o){
+        return '<div class="opt '+(o.correct?'yes':'no')+'">'
+          +quadFig(o.k,o.rot,{size:190,pad:34,marks:useMark,eq:!useMark})
+          +'<span class="onm">'+o.nm+'</span></div>';
+      }).join('')+'</div>';
+  }else{
+    $$('#board .ch').forEach(function(b,i){
+      var ok=!!(q.choices[i]&&q.choices[i].correct);
+      b.classList.toggle('yes',ok); if(!ok) b.classList.add('no'); b.disabled=true;
+    });
+  }
+  $('#check').hidden=true;$('#hintBtn').hidden=true;
+  var nx=$('#next');nx.hidden=false;nx.textContent=(G.i+1>=G.total)?'결과 보기':'다음 문제';
+}
+
+function answer(ok,btn){
+  if(G.done) return;
+  if(ok){
+    G.done=true;
+    var firstTry=(G.wrong===0),gain=0;
+    if(firstTry){G.first++;G.streak++;gain=10+(G.streak>=3?5:0);G.results[G.i]='ok'}
+    else{G.streak=0;G.results[G.i]='miss'}
+    G.earned+=gain;save.coins+=gain;persist();
+    setFace('happy');
+    fb(GOOD[rnd(0,GOOD.length-1)]+(gain?'  +'+gain+' 코인':''),'good');
+    tone(SND.good);
+    if(btn) btn.classList.add('yes');
+    $$('#board .opt,#board .ch').forEach(function(b){
+      b.disabled=true;
+      if(btn&&b!==btn&&!b.classList.contains('yes')) b.classList.add('no');
+    });
+    renderSol(true,true);
+    $('#sol').classList.remove('pop');void $('#sol').offsetWidth;$('#sol').classList.add('pop');
+    $('#check').hidden=true;$('#hintBtn').hidden=true;
+    var nx=$('#next');nx.hidden=false;nx.textContent=(G.i+1>=G.total)?'결과 보기':'다음 문제';
+    var cw=$('#coinPlay').parentNode;cw.classList.remove('bump');void cw.offsetWidth;cw.classList.add('bump');
+    paintCoins();renderPips();
+    G.log[G.i]={label:G.q.label,ok:firstTry,steps:G.q.steps};
+  }else{
+    G.wrong++;G.streak=0;G.results[G.i]='miss';
+    setFace('oops');
+    fb(OOPS[rnd(0,OOPS.length-1)],'bad');
+    tone(SND.bad);
+    if(btn){btn.classList.add('no');btn.disabled=true;btn.classList.remove('shake');void btn.offsetWidth;btn.classList.add('shake')}
+    if(G.wrong>=2){
+      G.done=true;
+      fb('같이 풀어 봐요. 아래 해설을 보세요.','bad');
+      reveal();
+      G.log[G.i]={label:G.q.label,ok:false,steps:G.q.steps};
+    }else renderSol(false,false);
+    renderPips();
+  }
+}
+function sameSet(a,b){
+  if(a.length!==b.length) return false;
+  var x=a.slice().sort(),y=b.slice().sort(),i;
+  for(i=0;i<x.length;i++) if(x[i]!==y[i]) return false;
+  return true;
+}
+
+$('#groups').addEventListener('click',function(e){
+  var b=e.target.closest('.lv');if(!b) return;
+  startGame(b.getAttribute('data-mode'),+b.getAttribute('data-lv'));
+});
+$('#board').addEventListener('click',function(e){
+  if(!G) return;
+  if(e.target.closest('#tool')){G.tool=!G.tool;renderQ();tone(SND.tap);return}
+  if(G.done) return;
+  var q=G.q;
+  var opt=e.target.closest('.opt');
+  if(opt&&!opt.disabled){
+    var oi=+opt.getAttribute('data-ans');
+    if(isMulti(q)){
+      var at=G.sel.indexOf(oi);
+      if(at>=0) G.sel.splice(at,1); else G.sel.push(oi);
+      G.sel.sort(function(a,b){return a-b});
+      renderQ();tone(SND.tap);return;
+    }
+    answer(!!q.opts[oi].correct,opt);return;
+  }
+  var ch=e.target.closest('.ch');
+  if(ch&&!ch.disabled&&q.choices) answer(!!q.choices[+ch.getAttribute('data-ans')].correct,ch);
+});
+$('#check').addEventListener('click',function(){
+  if(!G||G.done) return;
+  var q=G.q;
+  if(!isMulti(q)) return;
+  var want=[],i;
+  for(i=0;i<q.opts.length;i++) if(q.opts[i].correct) want.push(i);
+  answer(sameSet(G.sel,want),null);
+});
+$('#hintBtn').addEventListener('click',function(){
+  if(!G||G.done) return;
+  renderSol(false,false);
+  $('#sol').scrollIntoView({block:'nearest',behavior:'smooth'});
+});
+$('#next').addEventListener('click',function(){
+  if(G.i+1>=G.total){finish();return}
+  G.i++;nextQ();
+});
+
+function finish(){
+  var f=G.first,s=f>=7?3:(f>=5?2:1),bonus=0;
+  if(s===3){bonus=20;save.coins+=bonus;G.earned+=bonus}
+  var k=G.mode+G.lv;
+  save.stars[k]=Math.max(save.stars[k]||0,s);
+  var key=s===3?'gold':(s===2?'silver':'bronze');
+  save.seals[key]=(save.seals[key]||0)+1;
+  persist();
+  $('#rTitle').textContent=s===3?'모양 탐정 1급!':(s===2?'솜씨가 늘었어요!':'좋은 출발이에요!');
+  $('#rMsg').textContent=s===3?'거의 다 첫 번에 맞혔어요. 다음 단계도 할 수 있어요.'
+    :(s===2?'별 3개는 첫 번에 7문제를 맞히면 받아요.':'틀린 문제는 아래에서 해설을 다시 보면 쉬워져요.');
+  $('#rStars').innerHTML=starsHTML(s);
+  $('#rStars').setAttribute('aria-label','별 '+s+'개');
+  $('#prize').innerHTML=sealSVG(key)+'<div><b>'+SEAL[key].n+'</b> 획득! <br><span style="color:var(--muted);font-size:15px">지금까지 '+save.seals[key]+'개</span></div>';
+  $('#rFirst').textContent=f+' / '+G.total;
+  $('#rCoins').textContent='+'+G.earned+(bonus?' (탐정 보너스 +20 포함)':'');
+  $('#rface').innerHTML=glass('happy');
+  $('#nextLv').hidden=!(s>=2&&G.lv<3);
+  $('#rList').innerHTML=G.log.map(function(e,i){
+    if(!e) return '';
+    return '<details class="rv"><summary><span class="rv-n">'+(i+1)+'</span><span class="rv-q">'+e.label+'</span>'
+      +'<span class="rv-m '+(e.ok?'ok':'miss')+'">'+(e.ok?'○':'✕')+'</span><span class="rv-open"></span></summary>'
+      +'<div class="rv-b">'+stepsHTML(e.steps)+'</div></details>';
+  }).join('');
+  tone(SND.win);
+  show('result');
+}
+
+$('#back').addEventListener('click',function(){G=null;renderHome();show('home')});
+$('#toHome').addEventListener('click',function(){G=null;renderHome();show('home')});
+$('#again').addEventListener('click',function(){startGame(G.mode,G.lv)});
+$('#nextLv').addEventListener('click',function(){startGame(G.mode,G.lv+1)});
+$$('.snd').forEach(function(b){b.addEventListener('click',function(){save.sound=!save.sound;persist();paintSound();if(save.sound)tone(SND.tap)})});
+
+renderHome();show('home');
+})();
+</script>
+</body>
+</html>
+<!--
+  분수 주스 공장
+  © 2026 슬픈달 (knight0706.tistory.com)
+  무단 복제 및 재배포를 금합니다.
+-->
