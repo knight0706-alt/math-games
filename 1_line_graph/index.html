@@ -1,0 +1,1207 @@
+<!--
+  © 2026 슬픈달 (knight0706.tistory.com)
+  무단 복제 및 재배포를 금합니다.
+-->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#6A3A9A">
+<title>꺾은선 관측소</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=Noto+Sans+KR:wght@400;700&family=Roboto+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: 관측 기록실. 왼쪽 조수와 말풍선, 오른쪽 그래프판과 해설. 포도·호박 색. */
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#EFEAF5; --panel:#FFFFFF; --panel2:#F6F2FA; --ink:#241A33; --muted:#5B5074; --line:#CFC6DD;
+  --grape:#6A3A9A; --grape-deep:#47226C; --grape-ink:#FFFFFF;
+  --amber:#A3600A; --amber-deep:#774305; --amber-ink:#FFFBF2;
+  --paper:#FCFAFE; --grid:#DED6EA; --ghost:#A298B5;
+  --good:#166B4C; --bad:#B33322; --star:#B07D11; --focus:#1550CE;
+  --f-display:'Nanum Myeongjo','Apple SD Gothic Neo',serif;
+  --f-body:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;
+  --f-num:'Roboto Mono','SFMono-Regular',Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#171327; --panel:#211B36; --panel2:#2A2242; --ink:#EAE3F6; --muted:#ADA2C6; --line:#3B3157;
+    --grape:#C2A2F2; --grape-deep:#6E4DAE; --grape-ink:#160A28;
+    --amber:#F0B45A; --amber-deep:#A6721E; --amber-ink:#2A1A02;
+    --paper:#1C1730; --grid:#332A4D; --ghost:#5E5479;
+    --good:#5FD9A8; --bad:#FF8A72; --star:#F0C14B; --focus:#8FB8FF;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#171327; --panel:#211B36; --panel2:#2A2242; --ink:#EAE3F6; --muted:#ADA2C6; --line:#3B3157;
+  --grape:#C2A2F2; --grape-deep:#6E4DAE; --grape-ink:#160A28;
+  --amber:#F0B45A; --amber-deep:#A6721E; --amber-ink:#2A1A02;
+  --paper:#1C1730; --grid:#332A4D; --ghost:#5E5479;
+  --good:#5FD9A8; --bad:#FF8A72; --star:#F0C14B; --focus:#8FB8FF;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
+  word-break:keep-all;overflow-wrap:break-word;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+h1,h2,h3,p{margin:0}
+#app{height:100%;max-width:1140px;margin:0 auto;padding-inline:16px;padding-block:12px;display:flex;flex-direction:column}
+.screen{flex:1;min-height:0;display:flex;flex-direction:column}
+
+.btn{min-height:56px;padding:0 22px;border-radius:11px;border:0;background:var(--grape);color:var(--grape-ink);font-weight:700;font-size:18px;box-shadow:0 4px 0 var(--grape-deep)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--grape-deep)}
+.btn.go{background:var(--amber);color:var(--amber-ink);box-shadow:0 4px 0 var(--amber-deep)}
+.btn.go:active{box-shadow:0 1px 0 var(--amber-deep)}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.btn.ghost:active{transform:translateY(2px)}
+.btn.ghost.on{background:var(--panel2);border-color:var(--amber);color:var(--amber)}
+.btn.small{min-height:48px;font-size:16px;padding:0 14px}
+.coins{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:2px solid var(--line);border-radius:999px;padding:5px 14px 5px 7px;font-family:var(--f-num);font-weight:700;font-size:19px}
+.coin{width:26px;height:26px;border-radius:50%;background:var(--star);border:4px solid var(--grape-deep);display:inline-block}
+.bump{animation:bump .4s}
+
+/* 홈 */
+#home{overflow-y:auto}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(29px,5.2vw,44px);line-height:1.25;text-wrap:balance}
+.tag{display:inline-block;font-size:14px;font-weight:700;color:var(--amber);letter-spacing:.05em}
+.sub{color:var(--muted);margin-top:6px;max-width:38em;font-size:16px}
+.head-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.note{margin-top:14px;background:var(--panel);border:2px solid var(--line);border-left:6px solid var(--grape);border-radius:12px;padding:12px 15px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.note svg{width:76px;height:76px;flex:none;display:block}
+.note .nt{min-width:0}
+.note b{font-family:var(--f-display);font-weight:800;font-size:17px}
+.note p{font-size:15px;color:var(--muted);margin-top:3px}
+.badges{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:15px;color:var(--muted)}
+.badge-i{display:inline-flex;align-items:center;gap:5px;font-family:var(--f-num);font-weight:700;font-size:17px;color:var(--ink)}
+.badge-i svg{width:28px;height:28px;display:block}
+.grouptitle{font-family:var(--f-display);font-weight:800;font-size:19px;margin-top:20px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.grouptitle span{font-family:var(--f-body);font-weight:400;font-size:14px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:15px;margin-top:10px}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:13px;min-width:0}
+.ctop{display:flex;gap:13px;align-items:center}
+.ico{flex:none;width:74px;height:74px;display:grid;place-items:center;background:var(--paper);border:2px solid var(--line);border-radius:11px;overflow:hidden;padding:4px}
+.ico svg{display:block;max-height:64px;max-width:100%;width:auto;height:auto}
+.card h2{font-family:var(--f-display);font-weight:800;font-size:21px;line-height:1.3}
+.card p{color:var(--muted);font-size:14px}
+.lvs{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.lv{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;min-height:96px;padding:10px 11px;border:2px solid var(--line);border-radius:11px;background:var(--panel2)}
+.lv:active{transform:translateY(2px);border-color:var(--amber)}
+.lv-n{font-weight:700;font-size:18px;line-height:1.1}
+.lv-d{font-size:13px;color:var(--muted);line-height:1.3}
+.stars{margin-top:auto;letter-spacing:2px;font-size:17px}
+.st{color:var(--line)}.st.on{color:var(--star)}
+.foot{color:var(--muted);font-size:14px;margin-block:18px 8px;max-width:52em}
+
+/* 플레이 */
+.bar{display:flex;align-items:center;gap:9px 12px;flex-wrap:wrap;padding-bottom:10px}
+.bar-t{flex:1;min-width:120px;font-family:var(--f-display);font-weight:800;font-size:20px;line-height:1.25}
+.bar-t small{display:block;font-family:var(--f-body);font-weight:400;font-size:13px;color:var(--muted)}
+.pips{display:flex;gap:6px}
+.pip{width:13px;height:13px;border-radius:50%;border:2px solid var(--line)}
+.pip.cur{border-color:var(--ink);transform:scale(1.25)}
+.pip.ok{background:var(--good);border-color:var(--good)}
+.pip.miss{background:var(--amber);border-color:var(--amber)}
+.qn{font-family:var(--f-num);color:var(--muted);font-size:14px}
+.work{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-content:start;padding-bottom:14px}
+@media (min-width:880px){.work{grid-template-columns:minmax(220px,27%) minmax(0,1fr)}}
+.left{display:flex;gap:12px;align-items:flex-start}
+@media (min-width:880px){.left{flex-direction:column}}
+#face{flex:none;width:76px}
+#face svg{display:block;width:100%;height:auto}
+@media (min-width:880px){#face{width:104px;align-self:center}}
+.bubble{position:relative;background:var(--panel);border:2px solid var(--line);border-radius:13px;padding:12px 14px;flex:1;min-width:0}
+.bubble::before{content:"";position:absolute;width:13px;height:13px;background:var(--panel);border-left:2px solid var(--line);border-bottom:2px solid var(--line);left:-8px;top:24px;transform:rotate(45deg)}
+@media (min-width:880px){.bubble{width:100%;flex:none}.bubble::before{left:50%;top:-8px;margin-left:-7px;transform:rotate(135deg)}}
+#say{font-weight:700;font-size:19px;line-height:1.45}
+#fb{margin-top:5px;min-height:1.5em;font-size:16px;font-weight:700}
+#fb.good{color:var(--good)}#fb.bad{color:var(--bad)}
+.right{display:flex;flex-direction:column;gap:12px;min-width:0}
+.board{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:13px;min-width:0}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tip{font-size:15px;color:var(--muted);text-align:center}
+
+/* 그래프판 */
+.gwrap{background:var(--paper);border:2px solid var(--line);border-radius:11px;padding:6px}
+.lgc{display:block;width:100%;height:auto;max-width:520px;margin:0 auto}
+.lgc .axis{stroke:var(--ink);stroke-width:2.5;fill:none;stroke-linecap:square}
+.lgc .grid{stroke:var(--grid);stroke-width:1}
+.lgc .ln{fill:none;stroke:var(--grape);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.lgc .ln.dim{stroke:var(--ghost);stroke-width:2.5}
+.lgc .sg{fill:none;stroke:var(--amber);stroke-width:6;stroke-linecap:round}
+.lgc .pt{fill:var(--paper);stroke:var(--grape);stroke-width:3}
+.lgc .pt.hi{fill:var(--amber);stroke:var(--amber-deep)}
+.lgc .guide{stroke:var(--amber);stroke-width:2;stroke-dasharray:5 4;fill:none}
+.lgc .bar{fill:var(--grape);opacity:.7}
+.lgc .wv{fill:none;stroke:var(--amber);stroke-width:2.5;stroke-linecap:round}
+.lgc .lb{fill:var(--muted);font-family:var(--f-num);font-weight:500;font-size:13px}
+.lgc .xl{fill:var(--muted);font-family:var(--f-body);font-size:13px}
+.lgc .ttl{fill:var(--ink);font-family:var(--f-body);font-weight:700;font-size:15px}
+.lgc .un{fill:var(--muted);font-family:var(--f-body);font-size:13px}
+.lgc .dv{fill:var(--amber);font-family:var(--f-num);font-weight:700;font-size:13px}
+.lgc .qm{fill:var(--bad);font-family:var(--f-num);font-weight:700;font-size:20px}
+.lgc .cellmk{fill:none;stroke:var(--amber);stroke-width:2.5}
+.lgc .nm{fill:var(--amber);font-family:var(--f-body);font-weight:700;font-size:16px}
+.twin{display:flex;gap:10px;flex-wrap:wrap}
+.twin .gwrap{flex:1 1 210px;min-width:0}
+.twin .lgc{max-width:100%}
+
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:12px}
+.choices.wide{grid-template-columns:minmax(0,1fr)}
+.ch{min-height:82px;background:var(--panel2);border:3px solid var(--line);border-radius:12px;font-weight:700;font-size:clamp(17px,3.6vmin,23px);display:flex;align-items:center;justify-content:center;padding:10px 12px;line-height:1.35;text-align:center}
+.choices.wide .ch{min-height:66px;font-size:clamp(16px,3vmin,19px)}
+.ch:active{border-color:var(--amber);transform:translateY(2px)}
+.ch.no{opacity:.42;border-style:dashed;border-color:var(--bad)}
+.ch.yes{border-color:var(--good);box-shadow:0 0 0 3px var(--good)}
+.acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pickrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.pk{background:var(--panel2);border:3px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;align-items:center}
+.pk:active{border-color:var(--amber);transform:translateY(2px)}
+.pk.no{opacity:.45;border-style:dashed;border-color:var(--bad)}
+.pk.yes{border-color:var(--good);box-shadow:0 0 0 3px var(--good)}
+.pk .pnm{font-family:var(--f-display);font-weight:800;font-size:17px}
+.pk .gwrap{width:100%}
+
+/* 해설 */
+.sol{background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.sol-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--f-display);font-weight:800;font-size:19px}
+.sol-h .pill{font-family:var(--f-body);font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.steps{display:flex;flex-direction:column;gap:13px;counter-reset:s}
+.step{display:grid;grid-template-columns:32px minmax(0,1fr);gap:11px;align-items:start}
+.step::before{counter-increment:s;content:counter(s);width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--grape);color:var(--grape-ink);font-weight:700;font-size:17px}
+.step .sb{min-width:0}
+.step h3{font-weight:700;font-size:17px;margin-bottom:2px}
+.step p{font-size:16px;line-height:1.55}
+.step b{color:var(--amber)}
+.step .num{font-family:var(--f-num);font-weight:700}
+.defbox{margin-top:8px;padding:10px 13px;border-radius:9px;background:var(--panel2);border:1px dashed var(--grape);font-size:15px}
+.defbox b{color:var(--grape)}
+.fig{margin-top:9px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
+.fig .gwrap{flex:1 1 100%}
+.fig.half .gwrap{flex:1 1 210px}
+.tbl{margin-top:9px;width:100%;border-collapse:collapse;font-size:14px;font-family:var(--f-num)}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 5px;text-align:center}
+.tbl th{background:var(--panel2);font-weight:700;font-size:13px;font-family:var(--f-body)}
+.tbl td.up{color:var(--bad);font-weight:700}
+.tbl td.dn{color:var(--good);font-weight:700}
+.tbl td.big{background:var(--panel2);font-weight:700}
+
+/* 결과 */
+#result{overflow-y:auto}
+.res{max-width:640px;display:flex;flex-direction:column;gap:14px;padding-block:6px}
+.res-top{display:flex;align-items:center;gap:14px}
+#rface{width:92px;flex:none}
+#rface svg{display:block;width:100%;height:auto}
+.bigstars{font-size:clamp(42px,10vw,62px);letter-spacing:5px;line-height:1}
+.prize{display:flex;align-items:center;gap:12px;background:var(--panel);border:2px solid var(--star);border-radius:13px;padding:12px 14px}
+.prize svg{width:56px;height:56px;flex:none;display:block}
+.prize b{font-family:var(--f-display);font-weight:800;font-size:19px}
+.rstats{display:flex;flex-direction:column;gap:3px;font-size:17px}
+.rstats b{font-family:var(--f-num);font-weight:700;font-size:22px}
+.review{display:flex;flex-direction:column;gap:8px}
+.review h2{font-family:var(--f-display);font-weight:800;font-size:19px;margin-top:4px}
+details.rv{border:2px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+details.rv>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;padding:10px 13px;min-height:56px;font-weight:700;font-size:16px}
+details.rv>summary::-webkit-details-marker{display:none}
+.rv-n{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.rv-q{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rv-m{flex:none;font-size:19px}
+.rv-m.ok{color:var(--good)}.rv-m.miss{color:var(--amber)}
+.rv-open{flex:none;font-size:13px;font-weight:400;color:var(--muted)}
+details.rv[open] .rv-open::after{content:"닫기"}
+details.rv:not([open]) .rv-open::after{content:"해설"}
+.rv-b{padding:0 13px 13px;border-top:2px solid var(--line);margin-top:2px;padding-top:12px}
+
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes rise{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.shake{animation:shake .35s}
+.pop{animation:rise .4s}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+<style>
+/* 파일로 직접 열 때를 위한 기본값 (아티팩트에서는 플랫폼이 넣어 주는 부분) */
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px system-ui,-apple-system,sans-serif;background:#fafaf9}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <section id="home" class="screen">
+    <div class="head">
+      <div>
+        <span class="tag">자료와 가능성 1편</span>
+        <h1>꺾은선 관측소</h1>
+        <p class="sub">온도계와 자를 들고 하루하루 기록한 자료를 꺾은선그래프로 읽어요. 눈금 한 칸의 크기, 물결선의 뜻, 값과 변화를 읽는 법까지. 4학년 자료와 가능성, 꺾은선그래프 단원입니다.</p>
+      </div>
+      <div class="head-r">
+        <div class="coins" aria-label="코인"><span class="coin"></span><b id="coinHome">0</b></div>
+        <button class="btn ghost small snd" type="button">소리 켜짐</button>
+      </div>
+    </div>
+    <div class="note" id="note"></div>
+    <div class="badges" id="badges"></div>
+    <div id="groups"></div>
+    <p class="foot">한 판은 문제 8개예요. <b>맞혀도 해설이 펼쳐집니다.</b> 꺾은선그래프에서 가장 많이 실수하는 곳은 <b>눈금 한 칸의 크기</b>와 <b>물결선</b>이에요. 한 칸이 1이 아닐 수도 있고, 물결선 아래는 생략된 부분이라는 걸 꼭 기억하세요.</p>
+  </section>
+
+  <section id="play" class="screen" hidden>
+    <div class="bar">
+      <button class="btn ghost small" id="back" type="button">← 처음으로</button>
+      <div class="bar-t"><span id="mName"></span><small id="lName"></small></div>
+      <div class="pips" id="pips" role="img"></div>
+      <span class="qn" id="qn"></span>
+      <div class="coins" aria-label="코인"><span class="coin"></span><b id="coinPlay">0</b></div>
+      <button class="btn ghost small snd" type="button">소리 켜짐</button>
+    </div>
+    <div class="work">
+      <div class="left">
+        <div id="face"></div>
+        <div class="bubble">
+          <div id="say"></div>
+          <div id="fb" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="board" id="board"></div>
+        <div class="sol" id="sol" hidden></div>
+        <div class="acts">
+          <button class="btn ghost" id="hintBtn" type="button">힌트 보기</button>
+          <button class="btn" id="next" type="button" hidden>다음 문제</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="result" class="screen" hidden>
+    <div class="res">
+      <div class="res-top">
+        <div id="rface"></div>
+        <div><h1 id="rTitle"></h1><p class="sub" id="rMsg"></p></div>
+      </div>
+      <div class="bigstars" id="rStars" role="img"></div>
+      <div class="prize" id="prize"></div>
+      <div class="rstats">
+        <span>첫 번에 맞힌 문제 <b id="rFirst"></b></span>
+        <span>이번에 번 코인 <b id="rCoins"></b></span>
+      </div>
+      <div class="review">
+        <h2>8문제 다시 보기</h2>
+        <div id="rList"></div>
+      </div>
+      <div class="acts">
+        <button class="btn go" id="again" type="button">한 번 더</button>
+        <button class="btn" id="nextLv" type="button" hidden>다음 단계</button>
+        <button class="btn ghost" id="toHome" type="button">처음으로</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+'use strict';
+// ==LOGIC-START==
+var rnd=function(a,b){return Math.floor(Math.random()*(b-a+1))+a};
+var pick=function(a){return a[Math.floor(Math.random()*a.length)]};
+var shuffle=function(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=rnd(0,i),t=a[i];a[i]=a[j];a[j]=t}return a};
+function josaKo(s,w,o){
+  var c=s.charCodeAt(s.length-1);
+  if(c<0xAC00||c>0xD7A3) return o;
+  return ((c-0xAC00)%28!==0)?w:o;
+}
+function EUN(x){return x+josaKo(x,'은','는')}
+function IGA(x){return x+josaKo(x,'이','가')}
+function GWA(x){return x+josaKo(x,'과','와')}
+/* 단위는 읽는 말(도·센티미터·킬로그램…)에 따라 조사가 달라진다 */
+var UNIT={
+  '℃':{eul:'를',iyo:'예요',iga:'가'},
+  'cm':{eul:'를',iyo:'예요',iga:'가'},
+  'mm':{eul:'를',iyo:'예요',iga:'가'},
+  '%':{eul:'를',iyo:'예요',iga:'가'},
+  'kg':{eul:'을',iyo:'이에요',iga:'이'},
+  '명':{eul:'을',iyo:'이에요',iga:'이'},
+  '회':{eul:'를',iyo:'예요',iga:'가'}
+};
+function UIYO(u){return UNIT[u].iyo}
+function UEUL(u){return UNIT[u].eul}
+/* 틀린 답 후보 만들기. 반드시 끝난다 */
+function distract(ans,cands,need,step){
+  var seen=[ans],out=[],i;
+  for(i=0;i<cands.length&&out.length<need;i++){
+    var v=cands[i];
+    if(v>0&&v===Math.round(v)&&seen.indexOf(v)<0){seen.push(v);out.push(v)}
+  }
+  var k=1;
+  while(out.length<need&&k<400){
+    var w=ans+k*(step||1);
+    if(w>0&&seen.indexOf(w)<0){seen.push(w);out.push(w)}
+    k++;
+  }
+  return out;
+}
+
+/* ---- 그래프 그리기 ---- */
+var W=440,H=268,PX0=66,PX1=404,PY0=44,PY1=206;
+function gbOf(D){return D.wave?PY1-24:PY1}
+function cellOf(D){return (gbOf(D)-PY0)/D.n}
+function yAt(D,v){return gbOf(D)-(v-D.lo)/D.step*cellOf(D)}
+function gapOf(D){return (PX1-PX0)/D.xs.length}
+function xAt(D,i){return PX0+(i+1)*gapOf(D)}
+function topOf(D){return D.lo+D.step*D.n}
+function f(x){return (Math.round(x*10)/10)}
+function ln(cls,x1,y1,x2,y2){
+  return '<line class="'+cls+'" x1="'+f(x1)+'" y1="'+f(y1)+'" x2="'+f(x2)+'" y2="'+f(y2)+'"/>';
+}
+function tx(cls,x,y,s,an){
+  return '<text class="'+cls+'" x="'+f(x)+'" y="'+f(y)+'" text-anchor="'+(an||'middle')+'">'+s+'</text>';
+}
+function wavePath(x0,x1,y){
+  var d='M'+f(x0)+' '+f(y),x;
+  for(x=x0;x<x1;x+=16) d+=' q 4 -6 8 0 q 4 6 8 0';
+  return '<path class="wv" d="'+d+'"/>';
+}
+function chart(D,o){
+  o=o||{};
+  var i,gb=gbOf(D),cell=cellOf(D),gap=gapOf(D);
+  var h='<svg class="lgc" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+D.t+' 꺾은선그래프">';
+  /* 모눈 */
+  for(i=0;i<=D.n;i++){
+    var gy=yAt(D,D.lo+D.step*i);
+    h+=ln('grid',PX0,gy,PX1,gy);
+  }
+  for(i=0;i<D.xs.length;i++) h+=ln('grid',xAt(D,i),PY0,xAt(D,i),PY1);
+  /* 물결선 */
+  if(D.wave) h+=wavePath(PX0-8,PX1+4,gb+13);
+  /* 막대그래프로 보여 줄 때 */
+  if(o.bars){
+    var bw=gap*0.44;
+    for(i=0;i<D.xs.length;i++){
+      var by=yAt(D,D.ys[i]);
+      h+='<rect class="bar" x="'+f(xAt(D,i)-bw/2)+'" y="'+f(by)+'" width="'+f(bw)+'" height="'+f(PY1-by)+'"/>';
+    }
+  }
+  /* 꺾은선 */
+  if(!o.bars){
+    var pts=[];
+    for(i=0;i<D.xs.length;i++) pts.push(f(xAt(D,i))+','+f(yAt(D,D.ys[i])));
+    h+='<polyline class="ln'+(o.dim?' dim':'')+'" points="'+pts.join(' ')+'"/>';
+    if(o.seg){
+      var s0=o.seg[0],s1=o.seg[1];
+      h+=ln('sg',xAt(D,s0),yAt(D,D.ys[s0]),xAt(D,s1),yAt(D,D.ys[s1]));
+    }
+  }
+  /* 안내선 */
+  if(o.guide!=null){
+    var gx=xAt(D,o.guide),gy2=yAt(D,D.ys[o.guide]);
+    h+=ln('guide',PX0,gy2,gx,gy2)+ln('guide',gx,gy2,gx,PY1);
+  }
+  if(o.hline!=null) h+=ln('guide',PX0,yAt(D,o.hline),PX1,yAt(D,o.hline));
+  /* 한 칸 표시 */
+  if(o.cellmk){
+    var cx=PX0+17,y1=yAt(D,D.lo),y2=yAt(D,D.lo+D.step);
+    h+=ln('cellmk',cx-7,y1,cx+7,y1)+ln('cellmk',cx-7,y2,cx+7,y2)+ln('cellmk',cx,y1,cx,y2);
+    h+=tx('dv',cx+11,(y1+y2)/2+5,'한 칸','start');
+  }
+  /* 축 */
+  h+='<path class="axis" d="M'+PX0+' '+PY0+' L'+PX0+' '+PY1+' L'+PX1+' '+PY1+'"/>';
+  /* 구간별 변화량 */
+  if(o.diffs){
+    for(i=0;i<D.xs.length-1;i++){
+      var d=D.ys[i+1]-D.ys[i];
+      var ax1=xAt(D,i),ay1=yAt(D,D.ys[i]),ax2=xAt(D,i+1),ay2=yAt(D,D.ys[i+1]);
+      var vx=ax2-ax1,vy=ay2-ay1,LL=Math.sqrt(vx*vx+vy*vy)||1;
+      var nx=-vy/LL,ny=vx/LL;
+      if(ny>0){nx=-nx;ny=-ny}            /* 글자는 늘 선분의 위쪽으로 */
+      h+=tx('dv',(ax1+ax2)/2+nx*17,(ay1+ay2)/2+ny*17+4,(d>0?'+':'')+d);
+    }
+  }
+  /* 점 */
+  if(!o.bars) for(i=0;i<D.xs.length;i++){
+    var hi=(o.hi===i);
+    h+='<circle class="pt'+(hi?' hi':'')+'" cx="'+f(xAt(D,i))+'" cy="'+f(yAt(D,D.ys[i]))+'" r="'+(hi?6.5:5)+'"/>';
+  }
+  if(o.qm!=null) h+=tx('qm',xAt(D,o.qm),yAt(D,D.ys[o.qm])-13,'?');
+  /* 눈금 숫자 */
+  for(i=0;i<=D.n;i++) h+=tx('lb',PX0-8,yAt(D,D.lo+D.step*i)+5,String(D.lo+D.step*i),'end');
+  if(D.wave) h+=tx('lb',PX0-8,PY1+5,'0','end');
+  for(i=0;i<D.xs.length;i++) h+=tx('xl',xAt(D,i),PY1+19,D.xs[i]);
+  /* 제목과 단위 */
+  h+=tx('ttl',6,18,(D.pre||'')+D.t,'start');
+  h+=tx('un',PX0-6,PY0-10,'('+D.u+')','end');
+  h+=tx('xl',W-6,250,'('+D.xl+')','end');
+  if(o.nm) h+=tx('nm',W-8,18,o.nm,'end');
+  return h+'</svg>';
+}
+function gw(D,o){return '<div class="gwrap">'+chart(D,o)+'</div>'}
+function figOne(D,o){return '<div class="fig">'+gw(D,o)+'</div>'}
+function figTwo(a,b){return '<div class="fig half">'+a+b+'</div>'}
+
+/* ---- 자료 ---- */
+var SUBJ=[
+  {t:'교실의 온도',m:'온도',u:'℃',xl:'시각',xs:['9시','10시','11시','12시','1시','2시'],
+   pre:'오전 9시부터 오후 2시까지 ',steps:[1,2],zero:true,loR:[10,18],aH:'높은',aL:'낮은'},
+  {t:'운동장의 기온',m:'기온',u:'℃',xl:'시각',xs:['9시','10시','11시','12시','1시','2시'],
+   pre:'오전 9시부터 오후 2시까지 ',steps:[1,2],zero:true,loR:[8,16],aH:'높은',aL:'낮은'},
+  {t:'강낭콩 싹의 키',m:'키',u:'cm',xl:'날짜',xs:['1일','3일','5일','7일','9일','11일'],
+   pre:'',steps:[1,2],zero:true,loR:[4,10],aH:'큰',aL:'작은',grow:true},
+  {t:'해바라기의 키',m:'키',u:'cm',xl:'날짜',xs:['5일','10일','15일','20일','25일','30일'],
+   pre:'',steps:[5,10],zero:true,loR:[20,50],aH:'큰',aL:'작은',grow:true},
+  {t:'물의 온도',m:'온도',u:'℃',xl:'시간',xs:['0분','2분','4분','6분','8분','10분'],
+   pre:'',steps:[5,10],zero:true,loR:[20,40],aH:'높은',aL:'낮은'},
+  {t:'민서의 몸무게',m:'몸무게',u:'kg',xl:'월',xs:['3월','4월','5월','6월','7월','8월'],
+   pre:'',steps:[1,2],zero:false,loR:[28,34],aH:'무거운',aL:'가벼운'},
+  {t:'교실의 습도',m:'습도',u:'%',xl:'시각',xs:['9시','10시','11시','12시','1시','2시'],
+   pre:'오전 9시부터 오후 2시까지 ',steps:[5,10],zero:false,loR:[40,55],aH:'높은',aL:'낮은'},
+  {t:'우리 지역의 강수량',m:'강수량',u:'mm',xl:'월',xs:['5월','6월','7월','8월','9월','10월'],
+   pre:'',steps:[5,10],zero:true,loR:[30,60],aH:'많은',aL:'적은'},
+  {t:'도서관 방문자 수',m:'방문자 수',u:'명',xl:'요일',xs:['월','화','수','목','금','토'],
+   pre:'',steps:[5,10],zero:true,loR:[40,80],aH:'많은',aL:'적은'},
+  {t:'윤호의 줄넘기 기록',m:'횟수',u:'회',xl:'회차',xs:['1회','2회','3회','4회','5회','6회'],
+   pre:'',steps:[5,10],zero:true,loR:[30,60],aH:'많은',aL:'적은'}
+];
+/* 0 부터 n 까지의 칸 수열을 만든다. 조건을 못 맞추면 null 을 돌려주고 밖에서 다시 뽑는다 */
+function walk(n,cols,o){
+  o=o||{};
+  var base=o.min1?1:0, tries,i,j,u,c;
+  for(tries=0;tries<600;tries++){
+    var a=[],okk=true;
+    if(o.up){
+      /* 자라는 자료(식물의 키 등)는 줄어들지 않게. 그대로 머무는 구간은 자연스럽다 */
+      a.push(base);
+      var room=n-base, nz=0;
+      var cap=Math.max(1,Math.ceil(room/(cols-1)));
+      for(i=1;i<cols;i++){
+        var d=rnd(0,Math.min(cap+1,room));
+        if(d>0){room-=d;nz++}
+        a.push(a[i-1]+d);
+      }
+      if(nz<3) continue;
+    }else{
+      a.push(rnd(base,n));
+      for(i=1;i<cols;i++){
+        var d2=rnd(-3,3);
+        if(!o.flat&&d2===0) d2=pick([-1,1]);
+        var v=a[i-1]+d2;
+        if(v<base||v>n){okk=false;break}
+        a.push(v);
+      }
+      if(!okk) continue;
+    }
+    u={};c=0;
+    for(j=0;j<a.length;j++) if(!u[a[j]]){u[a[j]]=1;c++}
+    if(c<3) continue;
+    if(o.pred&&!o.pred(a)) continue;
+    return a;
+  }
+  return null;
+}
+function diffsOf(ys){var o=[],i;for(i=0;i<ys.length-1;i++)o.push(ys[i+1]-ys[i]);return o}
+function countOf(arr,v){var c=0,i;for(i=0;i<arr.length;i++)if(arr[i]===v)c++;return c}
+function uniqueMaxAbs(a){
+  var d=diffsOf(a).map(Math.abs),mx=Math.max.apply(null,d);
+  return mx>0&&countOf(d,mx)===1;
+}
+function uniqueMax(a){return countOf(a,Math.max.apply(null,a))===1}
+function uniqueMin(a){return countOf(a,Math.min.apply(null,a))===1}
+function hasUniqueValue(a){
+  var i;
+  for(i=0;i<a.length;i++) if(countOf(a,a[i])===1) return true;
+  return false;
+}
+/* 자료 한 벌 만들기. 조건을 만족하는 수열이 나올 때까지 다시 뽑되 반드시 끝난다 */
+function mkData(opt){
+  opt=opt||{};
+  var pool=SUBJ.filter(function(s){return opt.wave?true:s.zero});
+  if(opt.noGrow) pool=pool.filter(function(s){return !s.grow});
+  var round,S,cols,step,n,lo,a;
+  for(round=0;round<60;round++){
+    S=pick(pool);
+    cols=opt.cols||pick([5,6]);
+    var steps=S.steps.slice();
+    if(opt.bigStep) steps=steps.filter(function(x){return x>=2}).concat(steps);
+    step=pick(steps);
+    n=rnd(4,6);
+    lo=0;
+    if(opt.wave){
+      lo=Math.round(rnd(S.loR[0],S.loR[1])/step)*step;
+      if(lo<step) lo=step;
+    }
+    a=walk(n,cols,{pred:opt.pred,flat:opt.flat,up:!!S.grow,min1:!opt.wave});
+    if(a) break;
+  }
+  if(!a){
+    /* 안전망 : 어떤 조건에도 맞는 수열 한 벌 (가장 큰 변화·최댓값·최솟값이 모두 하나씩) */
+    S=pool[0]||SUBJ[0];
+    if(S.grow){
+      var alt=pool.filter(function(x){return !x.grow});
+      if(alt.length) S=alt[0];
+    }
+    cols=6;step=S.steps[0];n=6;
+    lo=opt.wave?Math.max(step,Math.round(14/step)*step):0;
+    a=[1,4,3,2,3,2];
+  }
+  var ys=a.map(function(k){return lo+step*k});
+  return {t:S.t,pre:S.pre,m:S.m,u:S.u,xl:S.xl,xs:S.xs.slice(0,cols),ys:ys,a:a,
+    lo:lo,step:step,n:n,wave:!!opt.wave,aH:S.aH,aL:S.aL,grow:!!S.grow};
+}
+function dkey(D){return D.t+D.step+'_'+D.lo+'_'+D.n+'_'+D.ys.join('.')}
+/* 같은 자료를 0 부터 그린 그래프 (물결선 없이) */
+function zeroVersion(D){
+  var mx=Math.max.apply(null,D.ys),i;
+  /* 한 칸이 원래 그래프보다 반드시 커야 0 부터 그린 쪽이 더 밋밋해 보인다 */
+  var cand=[1,2,5,10,20,25,50,100].filter(function(x){return x>D.step});
+  var st=cand[cand.length-1],nn;
+  for(i=0;i<cand.length;i++){ if(Math.ceil(mx/cand[i])<=6){st=cand[i];break} }
+  nn=Math.max(4,Math.ceil(mx/st));
+  return {t:D.t,pre:D.pre,m:D.m,u:D.u,xl:D.xl,xs:D.xs,ys:D.ys,lo:0,step:st,n:nn,wave:false,aH:D.aH,aL:D.aL};
+}
+
+var DEF_LINE='<div class="defbox">수량을 점으로 찍고 그 점들을 선분으로 이어 그린 그래프를 <b>꺾은선그래프</b>라고 합니다. 시간에 따라 <b>변해 가는 모습</b>을 한눈에 볼 수 있어요.</div>';
+var DEF_AXIS='<div class="defbox">꺾은선그래프의 <b>가로</b>에는 시각·날짜처럼 <b>변해 가는 것</b>을, <b>세로</b>에는 <b>재어서 얻은 값</b>을 나타냅니다.</div>';
+var DEF_CELL='<div class="defbox">세로 눈금 <b>한 칸의 크기</b>는 (눈금에 적힌 수의 차) ÷ (그 사이의 칸 수)로 구해요. 한 칸이 늘 1인 것은 아니니 꼭 확인해야 해요.</div>';
+var DEF_WAVE='<div class="defbox">필요 없는 부분을 줄여서 나타낼 때 쓰는 물결 모양의 선을 <b>물결선</b>이라고 합니다. 물결선 아래는 <b>생략된 부분</b>이에요.</div>';
+var DEF_CHANGE='<div class="defbox">꺾은선이 <b>오른쪽 위로 올라가면 늘어난 것</b>, <b>오른쪽 아래로 내려가면 줄어든 것</b>이에요. 선이 많이 기울어질수록 변화가 큽니다.</div>';
+
+function readSteps(D,i,extra){
+  var v=D.ys[i];
+  var cells=(v-D.lo)/D.step;
+  return [
+    {t:'점이 나타내는 값',b:'<p>꺾은선그래프에서 <b>점</b> 하나가 그때의 값을 나타내요. 가로 눈금에서 위로 올라가 점을 찾고, 그 점에서 왼쪽으로 가면 값을 읽을 수 있어요.</p>'+DEF_LINE},
+    {t:'눈금을 세어 보기',b:'<p>세로 눈금 한 칸은 <span class="num">'+D.step+' '+D.u+'</span>'+UIYO(D.u)+'. '
+      +(D.wave?('물결선이 있으니 맨 아래 눈금은 <span class="num">0</span>이 아니라 <span class="num">'+D.lo+'</span>부터 시작해요. '):'')
+      +'<b>'+D.xs[i]+'</b>의 점은 <span class="num">'+D.lo+'</span>에서 <b>'+cells+'칸</b> 위에 있어요.</p>'
+      +'<p style="margin-top:6px"><span class="num">'+D.lo+' + '+D.step+' × '+cells+' = '+v+'</span></p>',
+     fig:figOne(D,{hi:i,guide:i})},
+    {t:'답',b:'<p>그래서 '+D.xs[i]+'의 '+EUN(D.m)+' <b>'+v+' '+D.u+'</b>'+UIYO(D.u)+'.'
+      +(extra||'')+'</p>',
+     fig:figOne(D,{hi:i,guide:i}),reveal:true}
+  ];
+}
+function changeTable(D){
+  var ds=diffsOf(D.ys),i;
+  var h='<table class="tbl"><tr><th>구간</th>';
+  for(i=0;i<ds.length;i++) h+='<th>'+D.xs[i]+'~'+D.xs[i+1]+'</th>';
+  h+='</tr><tr><td class="big">변화</td>';
+  for(i=0;i<ds.length;i++) h+='<td class="'+(ds[i]>0?'up':(ds[i]<0?'dn':''))+'">'+(ds[i]>0?'+':'')+ds[i]+'</td>';
+  return h+'</tr></table>';
+}
+
+/* ---- 1. 그래프의 구조 ---- */
+var OTHERM=['시각','날짜','월','요일','온도','키','몸무게','습도','강수량','방문자 수','횟수','학생 수','회차','시간','길이'];
+/* 뜻이 거의 같아 둘 다 정답으로 보일 수 있는 말들 — 보기로 함께 내지 않는다 */
+var SYNON={'시각':['시간'],'시간':['시각'],'온도':['기온'],'기온':['온도'],'키':['길이'],'길이':['키']};
+function axisPool(D,ans,other){
+  var ban=[ans,other].concat(SYNON[ans]||[]).concat(SYNON[other]||[]);
+  return OTHERM.filter(function(x){
+    if(ban.indexOf(x)>=0) return false;
+    /* 가로 눈금에 그대로 적혀 있는 말도 빼기 (요일 그래프의 '월' 같은 것) */
+    var i;
+    for(i=0;i<D.xs.length;i++) if(D.xs[i]===x||D.xs[i].indexOf(x)>=0) return false;
+    return true;
+  });
+}
+var CHANGE_TOPIC=['날마다 재어 본 강낭콩 싹의 키','시각마다 재어 본 교실의 온도','달마다 재어 본 내 몸무게',
+  '날마다 조사한 낮 최고 기온','시간마다 잰 물의 온도','달마다 조사한 우리 지역의 강수량','해마다 조사한 우리 학교 학생 수'];
+var COUNT_TOPIC=['우리 반 학생들이 좋아하는 과일별 학생 수','반별 학생 수','좋아하는 운동별 학생 수',
+  '혈액형별 학생 수','좋아하는 색깔별 학생 수','마을별 자동차 수'];
+function genBasic(lv){
+  var q,D,i;
+  if(lv===1){
+    D=mkData({});
+    var ax=pick(['x','y']);
+    var ans=(ax==='x')?D.xl:D.m, other=(ax==='x')?D.m:D.xl;
+    var w2=pick(axisPool(D,ans,other));
+    q={type:'basic',sub:'axis',lv:lv,D:D,ax:ax,ans:ans,
+       key:'ba'+ax+dkey(D)+w2};
+    q.question='이 그래프의 <b>'+(ax==='x'?'가로':'세로')+'</b>는 무엇을 나타낼까요?';
+    q.label='가로와 세로가 나타내는 것';
+    q.choices=shuffle([{t:ans,correct:true},{t:other,correct:false},{t:w2,correct:false}]);
+    q.steps=[
+      {t:'가로와 세로의 역할',b:'<p>꺾은선그래프의 가로에는 <b>시각이나 날짜처럼 흘러가는 것</b>을, 세로에는 <b>재어서 얻은 값</b>을 나타내요.</p>'+DEF_AXIS},
+      {t:'그래프에 적힌 이름 보기',b:'<p>가로축 오른쪽 끝에 <b>('+D.xl+')</b>, 세로축 위쪽에 <b>('+D.u+')</b>라고 적혀 있어요. '
+        +'여기가 바로 각 축이 무엇을 나타내는지 알려 주는 자리예요.</p>',
+       fig:figOne(D,{})},
+      {t:'답',b:'<p>그래서 '+(ax==='x'?'가로':'세로')+'는 <b>'+ans+'</b>'+josaKo(ans,'을','를')+' 나타내요. '
+        +(ax==='x'?('가로 한 칸은 '+D.xs[0]+'에서 '+D.xs[1]+'까지만큼이에요.'):('세로 눈금 한 칸은 '+D.step+' '+D.u+UIYO(D.u)+'.'))+'</p>',
+       fig:figOne(D,{}),reveal:true}
+    ];
+  }else if(lv===2){
+    D=mkData({bigStep:(lv===2)});
+    var top=topOf(D);
+    q={type:'basic',sub:'cell',lv:lv,D:D,ans:D.step,key:'bc'+dkey(D)};
+    q.question='<b>세로 눈금 한 칸</b>은 몇 '+D.u+UEUL(D.u)+' 나타낼까요?';
+    q.label='세로 눈금 한 칸의 크기';
+    q.tool='cell';
+    q.choices=shuffle([{t:D.step+' '+D.u,correct:true}].concat(
+      distract(D.step,[D.step*2,Math.round(D.step/2),D.step+1,1,D.step*5],2)
+        .map(function(v){return {t:v+' '+D.u,correct:false}})));
+    q.steps=[
+      {t:'한 칸의 크기 구하는 법',b:'<p>눈금에 적힌 두 수의 차를 그 사이의 칸 수로 나누면 한 칸의 크기가 나와요.</p>'+DEF_CELL},
+      {t:'세어 보기',b:'<p>세로 눈금은 <span class="num">'+D.lo+'</span>에서 <span class="num">'+top+'</span>까지 <b>'+D.n+'칸</b>이에요.</p>'
+        +'<p style="margin-top:6px">(<span class="num">'+top+' - '+D.lo+'</span>) ÷ <span class="num">'+D.n+'</span> = <span class="num">'+D.step+'</span></p>',
+       fig:figOne(D,{cellmk:true})},
+      {t:'답',b:'<p>세로 눈금 한 칸은 <b>'+D.step+' '+D.u+'</b>'+UIYO(D.u)+'. '
+        +'한 칸이 1인 줄 알고 읽으면 값을 모두 틀리게 되니 <b>가장 먼저 확인</b>하는 습관을 들여요.</p>',
+       fig:figOne(D,{cellmk:true}),reveal:true}
+    ];
+  }else{
+    var good=pick(CHANGE_TOPIC), bads=shuffle(COUNT_TOPIC).slice(0,2);
+    var dd=mkData({});
+    q={type:'basic',sub:'what',lv:lv,D:null,demo:dd,ans:good,
+       key:'bw'+good+bads.join('')};
+    q.question='다음 중 <b>꺾은선그래프</b>로 나타내기에 알맞은 자료는 어느 것일까요?';
+    q.label='꺾은선그래프로 나타내기 알맞은 자료';
+    q.wide=true;
+    q.choices=shuffle([{t:good,correct:true}].concat(bads.map(function(x){return {t:x,correct:false}})));
+    q.steps=[
+      {t:'꺾은선그래프가 잘하는 일',b:'<p>꺾은선그래프는 <b>시간이 지나면서 변해 가는 모습</b>을 보여 주는 데 알맞아요. 점과 점을 선으로 이어서 오르내림이 한눈에 보이거든요.</p>'+DEF_LINE},
+      {t:'막대그래프와 비교해 보기',b:'<p>막대그래프는 <b>항목마다의 수를 서로 비교</b>할 때 좋아요. '
+        +'과일별 학생 수처럼 <b>흐르지 않는 항목</b>은 막대그래프로, 시각마다의 온도처럼 <b>흘러가며 변하는 것</b>은 꺾은선그래프로 나타내요.</p>',
+       fig:figTwo(gw(dd,{nm:'꺾은선그래프'}),gw(dd,{bars:true,nm:'막대그래프'}))},
+      {t:'답',b:'<p><b>'+good+'</b> — 시간이 지나면서 값이 변하니까 꺾은선그래프가 알맞아요.</p>'
+        +'<p style="margin-top:6px">나머지 둘은 항목별 수를 비교하는 자료라서 <b>막대그래프</b>가 더 알맞아요.</p>',reveal:true}
+    ];
+  }
+  return q;
+}
+
+/* ---- 2. 물결선 ---- */
+var WAVE_BAD=['값을 실제보다 크게 보이게 하려고','0부터 빠짐없이 모두 나타내려고',
+  '가로 눈금을 더 많이 넣으려고','점을 선으로 잇지 않으려고'];
+function genWave(lv){
+  var q,D,i;
+  if(lv===1){
+    D=mkData({wave:true,bigStep:true});
+    var bads=shuffle(WAVE_BAD).slice(0,2);
+    q={type:'wave',sub:'why',lv:lv,D:D,key:'ww'+dkey(D)+bads.join('').length+bads[0].slice(0,4)};
+    q.question='이 그래프에 <b>물결선</b>을 넣은 까닭은 무엇일까요?';
+    q.label='물결선을 넣은 까닭';
+    q.wide=true;
+    q.ans='필요 없는 부분을 줄여서 변화를 뚜렷하게 나타내려고';
+    q.choices=shuffle([{t:q.ans,correct:true}].concat(bads.map(function(x){return {t:x,correct:false}})));
+    var Z=zeroVersion(D);
+    q.steps=[
+      {t:'물결선이란',b:'<p>세로 눈금 아래쪽에 그려진 <b>물결 모양의 선</b>이 물결선이에요. 그 아래는 <b>생략했다</b>는 뜻이에요.</p>'+DEF_WAVE},
+      {t:'왜 줄였을까요',b:'<p>이 자료는 값이 모두 <span class="num">'+D.lo+'</span>보다 커요. '
+        +'<b>0부터 모두 그리면</b> 꺾은선이 위쪽에 몰려서 오르내림이 거의 보이지 않아요. '
+        +'필요 없는 아래쪽을 물결선으로 줄이면 <b>변화가 또렷하게</b> 보입니다.</p>',
+       fig:figTwo(gw(Z,{nm:'㉮ 0부터'}),gw(D,{nm:'㉯ 물결선'}))},
+      {t:'답',b:'<p><b>'+q.ans+'</b> — 이것이 물결선을 쓰는 까닭이에요. 물결선은 값을 바꾸는 것이 아니라 <b>그리지 않은 부분을 표시</b>하는 것뿐이에요.</p>',
+       fig:figOne(D,{}),reveal:true}
+    ];
+  }else if(lv===2){
+    D=mkData({wave:true,bigStep:true});
+    var hiIdx=[];
+    for(i=0;i<D.a.length;i++) if(D.a[i]>=1) hiIdx.push(i);
+    i=hiIdx.length?pick(hiIdx):rnd(0,D.xs.length-1);
+    var v=D.ys[i], mis=D.step*D.a[i];
+    q={type:'wave',sub:'read',lv:lv,D:D,i:i,ans:v,key:'wr'+dkey(D)+i};
+    q.question='<b>'+D.xs[i]+'</b>의 '+EUN(D.m)+' 몇 '+D.u+'일까요?';
+    q.label=D.t+' · '+D.xs[i]+'의 값 읽기';
+    q.tool='guide';
+    q.choices=shuffle([{t:v+' '+D.u,correct:true}].concat(
+      distract(v,[mis,v+D.step,v-D.step,v+2*D.step],2,D.step)
+        .map(function(x){return {t:x+' '+D.u,correct:false}})));
+    q.steps=readSteps(D,i,' 물결선 아래 <span class="num">0</span>부터 <span class="num">'+D.lo+'</span>까지는 생략된 부분이라 세지 않아요.');
+    q.steps[0]={t:'물결선부터 확인',b:'<p>물결선이 있으면 <b>맨 아래 눈금이 0이 아니에요.</b> 이 그래프는 <span class="num">'+D.lo+'</span>부터 시작해요.</p>'+DEF_WAVE};
+  }else{
+    D=mkData({wave:true,bigStep:true});
+    var Z2=zeroVersion(D);
+    var waveFirst=(rnd(0,1)===1);
+    var A=waveFirst?D:Z2, B=waveFirst?Z2:D;
+    q={type:'wave',sub:'cmp',lv:lv,D:D,Z:Z2,A:A,B:B,waveFirst:waveFirst,
+       key:'wc'+dkey(D)+(waveFirst?'1':'0')};
+    q.question='같은 자료를 두 가지로 나타냈어요. <b>변화하는 모습을 더 뚜렷하게</b> 알 수 있는 것은 어느 것일까요?';
+    q.label='물결선이 있는 그래프와 없는 그래프';
+    q.wide=true;
+    q.twin=true;
+    q.choices=shuffle([
+      {t:'㉮ 그래프',correct:waveFirst},
+      {t:'㉯ 그래프',correct:!waveFirst},
+      {t:'두 그래프는 차이가 없어요',correct:false}
+    ]);
+    q.steps=[
+      {t:'두 그래프는 같은 자료예요',b:'<p>값은 똑같아요. 다른 것은 <b>세로 눈금을 어디부터 그렸는지</b>뿐이에요.</p>'+DEF_WAVE},
+      {t:'어느 쪽이 잘 보이나요',b:'<p><b>0부터 그린 그래프</b>는 꺾은선이 위쪽에 몰려 거의 평평해 보여요. '
+        +'<b>물결선으로 아래를 줄인 그래프</b>는 한 칸이 <span class="num">'+D.step+' '+D.u+'</span>로 촘촘해서 오르내림이 또렷하게 보입니다.</p>',
+       fig:figTwo(gw(A,{nm:'㉮'}),gw(B,{nm:'㉯'}))},
+      {t:'답',b:'<p><b>'+(waveFirst?'㉮':'㉯')+' 그래프</b> — 물결선을 쓴 쪽이 변화를 뚜렷하게 보여 줘요. '
+        +'다만 물결선이 있으면 <b>값을 읽을 때 맨 아래 눈금을 꼭 확인</b>해야 해요.</p>',
+       fig:figOne(D,{}),reveal:true}
+    ];
+  }
+  return q;
+}
+
+/* ---- 3. 값 읽기 ---- */
+function genValue(lv){
+  var q,D,i;
+  if(lv===1){
+    D=mkData({});
+    i=rnd(0,D.xs.length-1);
+    var v=D.ys[i];
+    q={type:'value',sub:'at',lv:lv,D:D,i:i,ans:v,key:'va'+dkey(D)+i};
+    q.question='<b>'+D.xs[i]+'</b>의 '+EUN(D.m)+' 몇 '+D.u+'일까요?';
+    q.label=D.t+' · '+D.xs[i]+'의 값';
+    q.tool='guide';
+    q.choices=shuffle([{t:v+' '+D.u,correct:true}].concat(
+      distract(v,[v+D.step,v-D.step,v+2*D.step],2,D.step)
+        .map(function(x){return {t:x+' '+D.u,correct:false}})));
+    q.steps=readSteps(D,i,'');
+  }else if(lv===2){
+    D=mkData({pred:hasUniqueValue});
+    var cand=[];
+    for(i=0;i<D.ys.length;i++) if(countOf(D.ys,D.ys[i])===1) cand.push(i);
+    i=pick(cand);
+    var v2=D.ys[i];
+    var others=shuffle(D.xs.filter(function(_,k){return k!==i})).slice(0,2);
+    q={type:'value',sub:'when',lv:lv,D:D,i:i,ans:D.xs[i],key:'vw'+dkey(D)+i};
+    q.question=IGA(D.m)+' <b>'+v2+' '+D.u+'</b>인 때는 언제일까요?';
+    q.label=D.t+' · '+v2+' '+D.u+'인 때';
+    q.tool='hline';
+    q.hv=v2;
+    q.choices=shuffle([{t:D.xs[i],correct:true}].concat(others.map(function(x){return {t:x,correct:false}})));
+    q.steps=[
+      {t:'거꾸로 찾아가요',b:'<p>이번에는 값에서 시작해요. 세로 눈금에서 <span class="num">'+v2+'</span>을 찾아 <b>오른쪽으로 쭉</b> 가다가 점을 만나면, 그 점에서 <b>아래로</b> 내려가 가로 눈금을 읽어요.</p>'+DEF_LINE},
+      {t:'눈금을 세어 보기',b:'<p>세로 눈금 한 칸은 <span class="num">'+D.step+' '+D.u+'</span>'+UIYO(D.u)+'. '
+        +'<span class="num">'+D.lo+'</span>에서 <b>'+((v2-D.lo)/D.step)+'칸</b> 위가 <span class="num">'+v2+'</span>'+UIYO(D.u)+'.</p>',
+       fig:figOne(D,{hline:v2,hi:i})},
+      {t:'답',b:'<p>그 높이에 있는 점은 <b>'+D.xs[i]+'</b>의 점이에요. 그래서 답은 <b>'+D.xs[i]+'</b>'+josaKo(D.xs[i],'이에요','예요')+'.</p>',
+       fig:figOne(D,{hline:v2,hi:i,guide:i}),reveal:true}
+    ];
+  }else{
+    var high=(rnd(0,1)===1);
+    D=mkData({wave:true,bigStep:true,pred:high?uniqueMax:uniqueMin});
+    var want=high?Math.max.apply(null,D.ys):Math.min.apply(null,D.ys);
+    i=D.ys.indexOf(want);
+    var others3=shuffle(D.xs.filter(function(_,k){return k!==i})).slice(0,2);
+    q={type:'value',sub:'peak',lv:lv,D:D,i:i,high:high,ans:D.xs[i],key:'vp'+dkey(D)+(high?'H':'L')};
+    q.question=IGA(D.m)+' 가장 <b>'+(high?D.aH:D.aL)+'</b> 때는 언제일까요?';
+    q.label=D.t+' · 가장 '+(high?D.aH:D.aL)+' 때';
+    q.tool='cell';
+    q.choices=shuffle([{t:D.xs[i],correct:true}].concat(others3.map(function(x){return {t:x,correct:false}})));
+    q.steps=[
+      {t:'가장 '+(high?'위':'아래')+'에 있는 점 찾기',b:'<p>값이 가장 '+(high?D.aH:D.aL)+' 때는 점이 가장 '+(high?'<b>높이</b>':'<b>낮게</b>')+' 찍힌 곳이에요. 선을 따라가며 눈으로 찾아보세요.</p>'+DEF_LINE},
+      {t:'물결선 조심',b:'<p>물결선이 있어도 <b>점의 높이를 비교하는 것은 똑같아요.</b> 다만 값을 읽을 때는 맨 아래 눈금이 <span class="num">'+D.lo+'</span>부터라는 걸 잊지 마세요.</p>',
+       fig:figOne(D,{hi:i})},
+      {t:'답',b:'<p>가장 '+(high?D.aH:D.aL)+' 때는 <b>'+D.xs[i]+'</b>이고, 그때 '+EUN(D.m)+' <b>'+want+' '+D.u+'</b>'+UIYO(D.u)+'.</p>',
+       fig:figOne(D,{hi:i,guide:i}),reveal:true}
+    ];
+  }
+  return q;
+}
+
+/* ---- 4. 변화 읽기 ---- */
+function genChange(lv){
+  var q,D,i;
+  if(lv===1){
+    D=mkData({noGrow:true,flat:true});
+    i=rnd(0,D.xs.length-2);
+    var d=D.ys[i+1]-D.ys[i];
+    q={type:'change',sub:'dir',lv:lv,D:D,i:i,d:d,key:'cd'+dkey(D)+i};
+    q.question='<b>'+GWA(D.xs[i])+' '+D.xs[i+1]+'</b> 사이에 '+EUN(D.m)+' 어떻게 변했을까요?';
+    q.label=D.xs[i]+'~'+D.xs[i+1]+' 사이의 변화';
+    q.tool='diff';
+    q.choices=shuffle([
+      {t:'늘어났어요',correct:d>0},
+      {t:'줄어들었어요',correct:d<0},
+      {t:'변하지 않았어요',correct:d===0}
+    ]);
+    q.steps=[
+      {t:'선이 오르면 늘어난 것',b:'<p>두 점을 이은 선분이 <b>오른쪽 위</b>로 가면 늘어난 것, <b>오른쪽 아래</b>로 가면 줄어든 것, <b>평평</b>하면 변하지 않은 거예요.</p>'+DEF_CHANGE},
+      {t:'두 점을 비교해 보기',b:'<p>'+D.xs[i]+'은 <span class="num">'+D.ys[i]+' '+D.u+'</span>, '+D.xs[i+1]+'은 <span class="num">'+D.ys[i+1]+' '+D.u+'</span>'+UIYO(D.u)+'.</p>'
+        +'<p style="margin-top:6px"><span class="num">'+D.ys[i+1]+' - '+D.ys[i]+' = '+d+'</span></p>',
+       fig:figOne(D,{seg:[i,i+1],hi:i+1})},
+      {t:'답',b:'<p>'+(d>0?('<b>늘어났어요.</b> '+Math.abs(d)+' '+D.u+' 늘었어요.')
+          :(d<0?('<b>줄어들었어요.</b> '+Math.abs(d)+' '+D.u+' 줄었어요.')
+          :'<b>변하지 않았어요.</b> 두 값이 똑같아서 선이 평평해요.'))+'</p>'
+        +changeTable(D),
+       fig:figOne(D,{seg:[i,i+1],diffs:true}),reveal:true}
+    ];
+  }else if(lv===2){
+    D=mkData({pred:uniqueMaxAbs});
+    var ds=diffsOf(D.ys), ab=ds.map(Math.abs), mx=Math.max.apply(null,ab);
+    i=ab.indexOf(mx);
+    var segs=[],k;
+    for(k=0;k<ds.length;k++) segs.push(k);
+    var wrong=shuffle(segs.filter(function(k2){return k2!==i})).slice(0,2);
+    var lab=function(k3){return D.xs[k3]+' ~ '+D.xs[k3+1]};
+    q={type:'change',sub:'most',lv:lv,D:D,i:i,key:'cm'+dkey(D)};
+    q.question='늘든 줄든 상관없이, <b>변화가 가장 큰</b> 때는 언제와 언제 사이일까요?';
+    q.label=D.t+' · 변화가 가장 큰 때';
+    q.tool='diff';
+    q.choices=shuffle([{t:lab(i),correct:true}].concat(wrong.map(function(k4){return {t:lab(k4),correct:false}})));
+    q.steps=[
+      {t:'기울기를 눈으로 보기',b:'<p>선분이 <b>가장 가파른 곳</b>이 변화가 가장 큰 때예요. 오르든 내리든 상관없이 <b>기울어진 정도</b>를 봐요.</p>'+DEF_CHANGE},
+      {t:'칸 수를 세어 비교하기',b:'<p>눈으로 애매하면 구간마다 <b>세로로 몇 칸 움직였는지</b> 세어 보면 확실해요. 한 칸은 <span class="num">'+D.step+' '+D.u+'</span>'+UIYO(D.u)+'.</p>'
+        +changeTable(D),
+       fig:figOne(D,{diffs:true})},
+      {t:'답',b:'<p>변화가 가장 큰 때는 <b>'+lab(i)+'</b> 사이예요. 이때 '+EUN(D.m)+' '
+        +'<b>'+mx+' '+D.u+'</b> '+(ds[i]>0?'늘었어요':'줄었어요')+'.</p>',
+       fig:figOne(D,{seg:[i,i+1],diffs:true}),reveal:true}
+    ];
+  }else{
+    D=mkData({wave:true,bigStep:true,pred:function(a){return diffsOf(a).some(function(x){return x!==0})}});
+    var cands=[];
+    for(i=0;i<D.ys.length-1;i++) if(D.ys[i+1]!==D.ys[i]) cands.push(i);
+    i=pick(cands);
+    var d3=D.ys[i+1]-D.ys[i], ad=Math.abs(d3);
+    q={type:'change',sub:'amount',lv:lv,D:D,i:i,d:d3,ans:ad,key:'ca'+dkey(D)+i};
+    q.question='<b>'+GWA(D.xs[i])+' '+D.xs[i+1]+'</b> 사이에 '+EUN(D.m)+' 몇 '+D.u+' 변했을까요?';
+    q.label=D.xs[i]+'~'+D.xs[i+1]+' 사이의 변화량';
+    q.tool='diff';
+    q.choices=shuffle([{t:ad+' '+D.u,correct:true}].concat(
+      distract(ad,[ad+D.step,Math.abs(ad-D.step),D.step,ad*2],2,D.step)
+        .map(function(x){return {t:x+' '+D.u,correct:false}})));
+    q.steps=[
+      {t:'변화량은 두 값의 차',b:'<p>얼마나 변했는지는 <b>나중 값에서 처음 값을 뺀 것</b>이에요. 줄어들었으면 뺀 값이 음수가 되는데, "몇 '+D.u+' 변했나"를 물으면 <b>차이만큼</b>을 답해요.</p>'+DEF_CHANGE},
+      {t:'칸 수로 세어도 돼요',b:'<p>물결선이 있어도 <b>칸 수 세기는 그대로</b>예요. 두 점은 세로로 <b>'+(ad/D.step)+'칸</b> 떨어져 있고, 한 칸은 <span class="num">'+D.step+' '+D.u+'</span>'+UIYO(D.u)+'.</p>'
+        +'<p style="margin-top:6px"><span class="num">'+D.step+' × '+(ad/D.step)+' = '+ad+'</span></p>',
+       fig:figOne(D,{seg:[i,i+1],hi:i+1})},
+      {t:'답',b:'<p>'+GWA(D.xs[i])+' '+D.xs[i+1]+' 사이에 '+EUN(D.m)+' <b>'+ad+' '+D.u+'</b> '
+        +(d3>0?'늘었어요':'줄었어요')+'.</p>'+changeTable(D),
+       fig:figOne(D,{seg:[i,i+1],diffs:true}),reveal:true}
+    ];
+  }
+  return q;
+}
+// ==LOGIC-END==
+
+/* ---- 저장 ---- */
+var KEY='line-graph-v1';
+var save={coins:0,stars:{},seals:{gold:0,silver:0,bronze:0},sound:true};
+try{
+  var raw=localStorage.getItem(KEY);
+  if(raw){var so=JSON.parse(raw);if(so&&typeof so==='object'){
+    save.coins=+so.coins||0;save.stars=so.stars||{};save.sound=so.sound!==false;
+    if(so.seals)['gold','silver','bronze'].forEach(function(k){save.seals[k]=+so.seals[k]||0});
+  }}
+}catch(e){}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}}
+
+var $=function(s){return document.querySelector(s)};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+
+/* ---- 온도계 조수 ---- */
+function thermo(mood){
+  var c='var(--grape)', ink='#20123A';
+  var h='<svg viewBox="0 0 120 124" role="img" aria-label="온도계">';
+  h+='<ellipse cx="60" cy="118" rx="30" ry="4" fill="'+ink+'" opacity=".12"/>';
+  h+='<rect x="47" y="8" width="26" height="62" rx="13" fill="#F4EFFA" stroke="'+c+'" stroke-width="6"/>';
+  h+='<rect x="54" y="34" width="12" height="40" fill="#EFA93F"/>';
+  h+='<circle cx="60" cy="86" r="26" fill="#EFA93F" stroke="'+c+'" stroke-width="6"/>';
+  var eye=function(x,y){
+    if(mood==='happy') return '<path d="M'+(x-5)+' '+(y+2)+' Q'+x+' '+(y-6)+' '+(x+5)+' '+(y+2)+'" fill="none" stroke="'+ink+'" stroke-width="3" stroke-linecap="round"/>';
+    if(mood==='oops') return '<path d="M'+(x-4)+' '+(y-3)+' L'+(x+4)+' '+(y+3)+'M'+(x-4)+' '+(y+3)+' L'+(x+4)+' '+(y-3)+'" stroke="'+ink+'" stroke-width="2.6" stroke-linecap="round"/>';
+    return '<circle cx="'+x+'" cy="'+y+'" r="3.6" fill="'+ink+'"/>';
+  };
+  h+=eye(51,82)+eye(69,82);
+  if(mood==='happy') h+='<path d="M54 94 Q60 103 66 94 Z" fill="#3A1020"/>';
+  else if(mood==='oops') h+='<path d="M54 98 Q60 92 66 98" fill="none" stroke="'+ink+'" stroke-width="2.6" stroke-linecap="round"/>';
+  else h+='<path d="M54 94 Q60 100 66 94" fill="none" stroke="'+ink+'" stroke-width="2.6" stroke-linecap="round"/>';
+  return h+'</svg>';
+}
+var SEAL={gold:{n:'금 도장',c:'var(--star)'},silver:{n:'은 도장',c:'#9AA7B4'},bronze:{n:'동 도장',c:'#B07A45'}};
+function sealSVG(kind){
+  var c=SEAL[kind].c;
+  return '<svg viewBox="0 0 120 120" role="img" aria-label="'+SEAL[kind].n+'">'
+    +'<rect x="13" y="13" width="94" height="94" rx="12" fill="none" stroke="'+c+'" stroke-width="7"/>'
+    +'<polyline points="30,78 50,56 68,68 90,36" fill="none" stroke="'+c+'" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+}
+/* 카드 아이콘 */
+function icoSVG(kind){
+  var h='<svg viewBox="0 0 100 80" role="img" aria-label="'+kind+'">';
+  var ax='stroke="var(--ink)" stroke-width="3" fill="none" stroke-linecap="square"';
+  var zig='stroke="var(--grape)" stroke-width="4" fill="none" stroke-linejoin="round" stroke-linecap="round"';
+  if(kind==='basic'){
+    h+='<path d="M12 44 L12 44" />';
+    var i;
+    for(i=1;i<=3;i++) h+='<line x1="16" y1="'+(16*i+8)+'" x2="92" y2="'+(16*i+8)+'" stroke="var(--grid)" stroke-width="2"/>';
+    for(i=1;i<=3;i++) h+='<line x1="'+(16+20*i)+'" y1="10" x2="'+(16+20*i)+'" y2="66" stroke="var(--grid)" stroke-width="2"/>';
+    h+='<polyline points="36,52 56,34 76,42" '+zig+'/>';
+  }else if(kind==='wave'){
+    h+='<polyline points="30,50 50,30 70,44 88,22" '+zig+'/>';
+    h+='<path d="M10 58 q4 -6 8 0 q4 6 8 0 q4 -6 8 0 q4 6 8 0 q4 -6 8 0 q4 6 8 0 q4 -6 8 0 q4 6 8 0 q4 -6 8 0 q4 6 8 0" fill="none" stroke="var(--amber)" stroke-width="3"/>';
+  }else if(kind==='value'){
+    h+='<polyline points="28,52 48,30 68,44 88,26" '+zig+'/>';
+    h+='<line x1="16" y1="30" x2="48" y2="30" stroke="var(--amber)" stroke-width="2.5" stroke-dasharray="4 3"/>';
+    h+='<line x1="48" y1="30" x2="48" y2="66" stroke="var(--amber)" stroke-width="2.5" stroke-dasharray="4 3"/>';
+    h+='<circle cx="48" cy="30" r="6" fill="var(--amber)"/>';
+  }else{
+    h+='<polyline points="28,56 48,48 68,20 88,30" '+zig+'/>';
+    h+='<line x1="48" y1="48" x2="68" y2="20" stroke="var(--amber)" stroke-width="6" stroke-linecap="round"/>';
+    h+='<text x="74" y="56" fill="var(--amber)" font-family="monospace" font-weight="700" font-size="18">+6</text>';
+  }
+  h+='<path d="M16 10 L16 66 L92 66" '+ax+'/>';
+  return h+'</svg>';
+}
+
+/* ---- 소리 ---- */
+var AC=null;
+function tone(seq){
+  if(!save.sound) return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended') AC.resume();
+    var t0=AC.currentTime;
+    seq.forEach(function(s){
+      var o=AC.createOscillator(),g=AC.createGain();
+      o.type='triangle';o.frequency.value=s[0];
+      g.gain.setValueAtTime(0.0001,t0+s[1]);
+      g.gain.exponentialRampToValueAtTime(0.14,t0+s[1]+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+s[1]+s[2]);
+      o.connect(g);g.connect(AC.destination);
+      o.start(t0+s[1]);o.stop(t0+s[1]+s[2]+0.05);
+    });
+  }catch(e){}
+}
+var SND={good:[[659,0,.13],[988,.11,.25]],bad:[[185,0,.27]],tap:[[520,0,.05]],
+  win:[[587,0,.13],[784,.11,.13],[988,.22,.13],[1319,.33,.33]]};
+function paintSound(){$$('.snd').forEach(function(b){b.textContent=save.sound?'소리 켜짐':'소리 꺼짐'})}
+
+/* ---- 모드 ---- */
+var MODES={
+  basic:{name:'그래프 읽을 준비',desc:'가로·세로가 뭘 나타내는지, 한 칸이 얼마인지',
+    lv:['가로와 세로','눈금 한 칸의 크기','어떤 자료에 알맞을까'],group:0,ico:icoSVG('basic')},
+  wave:{name:'물결선',desc:'생략한 부분을 알려 주는 선',
+    lv:['물결선을 쓴 까닭','물결선 그래프 읽기','두 그래프 비교하기'],group:0,ico:icoSVG('wave')},
+  value:{name:'값 읽기',desc:'점이 가리키는 값을 찾아요',
+    lv:['그때의 값은?','그 값이 된 때는?','가장 높은 때·낮은 때'],group:1,ico:icoSVG('value')},
+  change:{name:'변화 읽기',desc:'늘었는지 줄었는지, 얼마나 변했는지',
+    lv:['늘었나 줄었나','변화가 가장 큰 때','몇 만큼 변했나'],group:1,ico:icoSVG('change')}
+};
+var GROUPS=[
+  {t:'꺾은선그래프 알아보기',s:'가로와 세로 · 눈금 한 칸 · 물결선',keys:['basic','wave']},
+  {t:'꺾은선그래프의 내용 알아보기',s:'값 읽기 · 변화 읽기',keys:['value','change']}
+];
+var GENS={basic:genBasic,wave:genWave,value:genValue,change:genChange};
+var TOOLNAME={cell:'한 칸 표시',guide:'안내선',hline:'안내선',diff:'변화량'};
+var GOOD=['정확해요!','눈금을 잘 셌네요!','정답이에요!','우와, 관측 솜씨네요!','선을 잘 따라갔어요!','빈틈이 없네요!'];
+var OOPS=['앗, 다시 볼까요?','조금만 더 생각해 봐요.','괜찮아요, 해설을 같이 봐요.','거의 다 왔어요!'];
+
+/* ---- 화면 ---- */
+var starsHTML=function(s){return [1,2,3].map(function(i){return '<span class="st'+(i<=s?' on':'')+'">★</span>'}).join('')};
+function show(id){
+  ['home','play','result'].forEach(function(s){$('#'+s).hidden=(s!==id)});
+  $('#'+id).scrollTop=0;
+}
+function paintCoins(){$('#coinHome').textContent=save.coins;$('#coinPlay').textContent=save.coins}
+function renderNote(){
+  $('#note').innerHTML=thermo('idle')
+    +'<div class="nt"><b>꺾은선그래프와 물결선</b>'
+    +'<p>수량을 점으로 찍고 선분으로 이어 그린 그래프가 <b>꺾은선그래프</b>예요. '
+    +'필요 없는 아래쪽을 줄여서 나타낼 때 쓰는 물결 모양 선이 <b>물결선</b>이고요.</p></div>';
+  var tot=save.seals.gold+save.seals.silver+save.seals.bronze;
+  $('#badges').innerHTML=tot
+    ? '<span>모은 도장</span>'+['gold','silver','bronze'].map(function(k){
+        return '<span class="badge-i" title="'+SEAL[k].n+'">'+sealSVG(k)+'<span>'+save.seals[k]+'</span></span>';
+      }).join('')
+    : '<span>한 판을 끝내면 관측 도장을 찍어 드려요.</span>';
+}
+function renderHome(){
+  paintCoins();paintSound();renderNote();
+  $('#groups').innerHTML=GROUPS.map(function(G){
+    return '<h2 class="grouptitle">'+G.t+' <span>'+G.s+'</span></h2><div class="cards">'
+      +G.keys.map(function(m){
+        var M=MODES[m];
+        var lvs=[1,2,3].map(function(l){
+          var s=save.stars[m+l]||0;
+          return '<button class="lv" type="button" data-mode="'+m+'" data-lv="'+l+'"><span class="lv-n">'+l+'단계</span>'
+            +'<span class="lv-d">'+M.lv[l-1]+'</span><span class="stars" role="img" aria-label="별 '+s+'개">'+starsHTML(s)+'</span></button>';
+        }).join('');
+        return '<article class="card"><div class="ctop"><div class="ico">'+M.ico+'</div><div><h2>'+M.name+'</h2><p>'+M.desc+'</p></div></div>'
+          +'<div class="lvs">'+lvs+'</div></article>';
+      }).join('')+'</div>';
+  }).join('');
+}
+
+/* ---- 게임 ---- */
+var G=null;
+function startGame(mode,lv){
+  G={mode:mode,lv:lv,i:0,total:8,first:0,streak:0,earned:0,results:[],used:{},log:[],q:null,wrong:0,done:false,tool:false};
+  $('#mName').textContent=MODES[mode].name;
+  $('#lName').textContent=lv+'단계 · '+MODES[mode].lv[lv-1];
+  show('play');
+  nextQ();
+}
+function setFace(mood){$('#face').innerHTML=thermo(mood)}
+function fb(t,c){var e=$('#fb');e.innerHTML=t||'';e.className=c||''}
+function renderPips(){
+  $('#pips').innerHTML=Array.from({length:G.total},function(_,i){
+    return '<i class="pip '+(G.results[i]||'')+(i===G.i?' cur':'')+'"></i>';
+  }).join('');
+  $('#pips').setAttribute('aria-label',(G.i+1)+' / '+G.total+'번째 문제');
+  $('#qn').textContent=(G.i+1)+' / '+G.total;
+}
+function stepsHTML(steps){
+  return '<div class="steps">'+steps.map(function(s){
+    return '<div class="step"><div class="sb"><h3>'+s.t+'</h3>'+s.b+(s.fig||'')+'</div></div>';
+  }).join('')+'</div>';
+}
+function renderSol(full,won){
+  var steps=G.q.steps.filter(function(s){return full||!s.reveal});
+  if(!steps.length){$('#sol').hidden=true;return}
+  $('#sol').hidden=false;
+  var head=full?(won?'정답! 왜 그런지 같이 볼까요':'해설'):'힌트';
+  var pill=full?(won?'맞혀도 해설은 꼭 보기':'끝까지 같이 풀어 봐요'):'여기까지만 알려줄게요';
+  $('#sol').innerHTML='<div class="sol-h"><span>'+head+'</span><span class="pill">'+pill+'</span></div>'+stepsHTML(steps);
+}
+function hideSol(){$('#sol').hidden=true;$('#sol').innerHTML=''}
+
+function nextQ(){
+  G.done=false;G.wrong=0;G.tool=false;
+  var q,tries=0;
+  do{q=GENS[G.mode](G.lv);tries++}while(G.used[q.key]&&tries<60);
+  G.used[q.key]=1;G.q=q;
+  setFace('idle');fb('');hideSol();
+  $('#next').hidden=true;$('#hintBtn').hidden=false;
+  renderQ();renderPips();paintCoins();
+}
+function boardOpts(q){
+  var o={};
+  if(q.tool==='cell') o.cellmk=G.tool;
+  else if(q.tool==='guide'){ if(G.tool){o.guide=q.i;o.hi=q.i} }
+  else if(q.tool==='hline'){ if(G.tool) o.hline=q.hv }
+  else if(q.tool==='diff') o.diffs=G.tool;
+  return o;
+}
+function choicesHTML(q){
+  return '<div class="choices'+(q.wide?' wide':'')+'">'+q.choices.map(function(c,i){
+    return '<button class="ch" type="button" data-ans="'+i+'">'+c.t+'</button>';
+  }).join('')+'</div>';
+}
+function renderQ(){
+  var q=G.q,h='';
+  if(q.twin){
+    h='<div class="twin">'+gw(q.A,{nm:'㉮'})+gw(q.B,{nm:'㉯'})+'</div>';
+  }else if(q.D){
+    h=gw(q.D,boardOpts(q));
+    if(q.tool) h+='<div class="tools"><button class="btn ghost'+(G.tool?' on':'')+'" id="tool" type="button">'
+      +TOOLNAME[q.tool]+' '+(G.tool?'끄기':'켜기')+'</button></div>';
+  }
+  h+=choicesHTML(q);
+  $('#say').innerHTML=q.question;
+  $('#board').innerHTML=h;
+}
+
+function reveal(){
+  renderSol(true,false);
+  $$('#board .ch').forEach(function(b,i){
+    var ok=!!(G.q.choices[i]&&G.q.choices[i].correct);
+    b.classList.toggle('yes',ok); if(!ok) b.classList.add('no'); b.disabled=true;
+  });
+  $('#hintBtn').hidden=true;
+  var nx=$('#next');nx.hidden=false;nx.textContent=(G.i+1>=G.total)?'결과 보기':'다음 문제';
+}
+
+function answer(ok,btn){
+  if(G.done) return;
+  if(ok){
+    G.done=true;
+    var firstTry=(G.wrong===0),gain=0;
+    if(firstTry){G.first++;G.streak++;gain=10+(G.streak>=3?5:0);G.results[G.i]='ok'}
+    else{G.streak=0;G.results[G.i]='miss'}
+    G.earned+=gain;save.coins+=gain;persist();
+    setFace('happy');
+    fb(GOOD[rnd(0,GOOD.length-1)]+(gain?'  +'+gain+' 코인':''),'good');
+    tone(SND.good);
+    if(btn) btn.classList.add('yes');
+    $$('#board .ch').forEach(function(b){
+      b.disabled=true;
+      if(btn&&b!==btn&&!b.classList.contains('yes')) b.classList.add('no');
+    });
+    renderSol(true,true);
+    $('#sol').classList.remove('pop');void $('#sol').offsetWidth;$('#sol').classList.add('pop');
+    $('#hintBtn').hidden=true;
+    var nx=$('#next');nx.hidden=false;nx.textContent=(G.i+1>=G.total)?'결과 보기':'다음 문제';
+    var cw=$('#coinPlay').parentNode;cw.classList.remove('bump');void cw.offsetWidth;cw.classList.add('bump');
+    paintCoins();renderPips();
+    G.log[G.i]={label:G.q.label,ok:firstTry,steps:G.q.steps};
+  }else{
+    G.wrong++;G.streak=0;G.results[G.i]='miss';
+    setFace('oops');
+    fb(OOPS[rnd(0,OOPS.length-1)],'bad');
+    tone(SND.bad);
+    if(btn){btn.classList.add('no');btn.disabled=true;btn.classList.remove('shake');void btn.offsetWidth;btn.classList.add('shake')}
+    if(G.wrong>=2){
+      G.done=true;
+      fb('같이 풀어 봐요. 아래 해설을 보세요.','bad');
+      reveal();
+      G.log[G.i]={label:G.q.label,ok:false,steps:G.q.steps};
+    }else renderSol(false,false);
+    renderPips();
+  }
+}
+
+$('#groups').addEventListener('click',function(e){
+  var b=e.target.closest('.lv');if(!b) return;
+  startGame(b.getAttribute('data-mode'),+b.getAttribute('data-lv'));
+});
+$('#board').addEventListener('click',function(e){
+  if(!G) return;
+  if(e.target.closest('#tool')){G.tool=!G.tool;renderQ();tone(SND.tap);return}
+  if(G.done) return;
+  var ch=e.target.closest('.ch');
+  if(ch&&!ch.disabled) answer(!!G.q.choices[+ch.getAttribute('data-ans')].correct,ch);
+});
+$('#hintBtn').addEventListener('click',function(){
+  if(!G||G.done) return;
+  renderSol(false,false);
+  $('#sol').scrollIntoView({block:'nearest',behavior:'smooth'});
+});
+$('#next').addEventListener('click',function(){
+  if(G.i+1>=G.total){finish();return}
+  G.i++;nextQ();
+});
+
+function finish(){
+  var f=G.first,s=f>=7?3:(f>=5?2:1),bonus=0;
+  if(s===3){bonus=20;save.coins+=bonus;G.earned+=bonus}
+  var k=G.mode+G.lv;
+  save.stars[k]=Math.max(save.stars[k]||0,s);
+  var key=s===3?'gold':(s===2?'silver':'bronze');
+  save.seals[key]=(save.seals[key]||0)+1;
+  persist();
+  $('#rTitle').textContent=s===3?'관측 대장 1급!':(s===2?'솜씨가 늘었어요!':'좋은 출발이에요!');
+  $('#rMsg').textContent=s===3?'거의 다 첫 번에 맞혔어요. 다음 단계도 할 수 있어요.'
+    :(s===2?'별 3개는 첫 번에 7문제를 맞히면 받아요.':'틀린 문제는 아래에서 해설을 다시 보면 쉬워져요.');
+  $('#rStars').innerHTML=starsHTML(s);
+  $('#rStars').setAttribute('aria-label','별 '+s+'개');
+  $('#prize').innerHTML=sealSVG(key)+'<div><b>'+SEAL[key].n+'</b> 획득! <br><span style="color:var(--muted);font-size:15px">지금까지 '+save.seals[key]+'개</span></div>';
+  $('#rFirst').textContent=f+' / '+G.total;
+  $('#rCoins').textContent='+'+G.earned+(bonus?' (관측 보너스 +20 포함)':'');
+  $('#rface').innerHTML=thermo('happy');
+  $('#nextLv').hidden=!(s>=2&&G.lv<3);
+  $('#rList').innerHTML=G.log.map(function(e,i){
+    if(!e) return '';
+    return '<details class="rv"><summary><span class="rv-n">'+(i+1)+'</span><span class="rv-q">'+e.label+'</span>'
+      +'<span class="rv-m '+(e.ok?'ok':'miss')+'">'+(e.ok?'○':'✕')+'</span><span class="rv-open"></span></summary>'
+      +'<div class="rv-b">'+stepsHTML(e.steps)+'</div></details>';
+  }).join('');
+  tone(SND.win);
+  show('result');
+}
+
+$('#back').addEventListener('click',function(){G=null;renderHome();show('home')});
+$('#toHome').addEventListener('click',function(){G=null;renderHome();show('home')});
+$('#again').addEventListener('click',function(){startGame(G.mode,G.lv)});
+$('#nextLv').addEventListener('click',function(){startGame(G.mode,G.lv+1)});
+$$('.snd').forEach(function(b){b.addEventListener('click',function(){save.sound=!save.sound;persist();paintSound();if(save.sound)tone(SND.tap)})});
+
+renderHome();show('home');
+})();
+</script>
+</body>
+</html>
+<!--
+  © 2026 슬픈달 (knight0706.tistory.com)
+  무단 복제 및 재배포를 금합니다.
+-->
